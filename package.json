@@ -14,5 +14,10 @@
     "morgan": "~1.6.1",
     "pmx": "^0.4.6",
     "serve-favicon": "~2.3.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.9.5",
+    "gulp": "^3.9.0",
+    "gulp-nodemon": "^2.0.4"
   }
 }
