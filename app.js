@@ -9,8 +9,10 @@ var socket_io = require('socket.io');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
+//express
 var app = express();
 
+//socket.io
 var io = socket_io();
 app.io = io;
 
@@ -25,7 +27,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/', routes);
 app.use('/users', users);
 
@@ -60,10 +61,15 @@ app.use(function(err, req, res, next) {
   });
 });
 
+//socket.io functionality
+var numberOfConnections = 0;
+
 io.on('connection', function(socket){
   console.log('a user connected');
+  numberOfConnections++;
   socket.on('disconnect', function(){
     console.log('user disconnected');
+    numberOfConnections--;
   });
 });
 
