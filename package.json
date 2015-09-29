@@ -19,6 +19,6 @@
   "devDependencies": {
     "browser-sync": "^2.9.5",
     "gulp": "^3.9.0",
-    "gulp-nodemon": "^2.0.4"
+    "gulp-supervisor": "^0.1.2"
   }
 }
