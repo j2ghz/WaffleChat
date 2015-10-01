@@ -16,7 +16,6 @@ gulp.task('browser-sync', ['supervisor'], function() {
 gulp.task('supervisor', function() {
   supervisor( "./bin/www", {
           args: [],
-          watch: [ "**/*" ],
           ignore: [ "node_modules" ],
           pollInterval: 500,
           extensions: [ "js" ],
