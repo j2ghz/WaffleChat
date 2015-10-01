@@ -1,6 +1,5 @@
 var gulp = require('gulp');
 var browserSync = require('browser-sync');
-var nodemon = require('gulp-nodemon');
 var supervisor = require( "gulp-supervisor" );
 
 gulp.task('default', ['browser-sync'], function() {});
