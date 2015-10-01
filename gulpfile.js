@@ -1,17 +1,7 @@
 var gulp = require('gulp');
-var browserSync = require('browser-sync');
 var supervisor = require( "gulp-supervisor" );
 
-gulp.task('default', ['browser-sync'], function() {});
-
-gulp.task('browser-sync', ['supervisor'], function() {
-  browserSync.init(null, {
-    proxy: "http://localhost:3000",
-    files: ["**/*.*"],
-    browser: "google chrome",
-    port: 7000,
-  });
-});
+gulp.task('default', ['supervisor'], function() {});
 gulp.task('supervisor', function() {
   supervisor( "./bin/www", {
           args: [],
