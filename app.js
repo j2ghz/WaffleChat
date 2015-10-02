@@ -8,7 +8,6 @@ var http = require('http').Server(express);
 var socket_io = require('socket.io');
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var expressSession = require('express-session');
 
 //express
 var app = express();
@@ -28,7 +27,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(expressSession({secret:'yoloswag',resave: true,saveUninitialized: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 //fix this to be used dynamically using sendfile app.use("/room", express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
