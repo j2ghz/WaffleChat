@@ -5,7 +5,7 @@ gulp.task('default', ['supervisor'], function() {});
 gulp.task('supervisor', function() {
   supervisor( "./bin/www", {
           args: [],
-          ignore: [ "node_modules" ],
+          ignore: [ "node_modules", ".git" ],
           pollInterval: 500,
           extensions: [ "js" ],
           exec: "node",
