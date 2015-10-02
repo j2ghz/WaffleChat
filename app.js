@@ -15,7 +15,7 @@ var app = express();
 //socket.io
 var io = socket_io(); //init socket.io
 app.io = io; //provide io object to /bin/www via module.export of app
-require('./sockets')(io); //use logic from sockets.js file and provide io object from this file
+require('./sockets')(app,io); //use logic from sockets.js file and provide io object from this file
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
