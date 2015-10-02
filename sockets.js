@@ -1,5 +1,6 @@
 //this file exports the custom socket.io functionality to app.js and is provided the io object by app.js
-module.exports = function(io){
+module.exports = function(app,io){
+  var clients = {}, rooms = {};
   io.on('connection', function(socket){
     console.log('user connected');
     socket.on('joinRoom',function(roomId){
