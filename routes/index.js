@@ -6,8 +6,4 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
-router.get('/:id', function(req, res, next) {
-  res.render('room');
-});
-
 module.exports = router;
