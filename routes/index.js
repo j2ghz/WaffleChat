@@ -6,7 +6,7 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
-router.get('/create', function(req, res, next){
+router.get('/room/:id', function(req, res, next) {
   res.render('index');
 });
 
