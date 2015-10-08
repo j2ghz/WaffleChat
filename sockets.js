@@ -9,9 +9,10 @@ module.exports = function(io){
   io.on('connection', function(socket){
     console.log('user connected');
     socket.on('joinRoom',function(roomName){
-      db.run("INSERT INTO threads ('name') VALUES ('"+roomName+"')");
+      db.run("INSERT INTO threads ('name') SELECT '"+roomName+"' WHERE NOT EXISTS (SELECT 1 FROM threads WHERE name='"+roomName+"')");
       socket.join(roomName);
       socket.room = roomName;
+      io.emit('updateRooms'); //send list of rooms
     });
     socket.on('disconnect', function(){
       console.log('user disconnected');
