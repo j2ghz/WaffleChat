@@ -2,19 +2,20 @@
 var socket = io();
 var m = $('#messageInput');
 
-socket.on('connect',function(){
-	socket.emit('joinRoom', prompt("Select room"));
+$("button#joinThread").click(function(){
+	socket.emit('joinThread', prompt("Select thread"));
 });
 $('#messageForm').submit(function(){
 	if(m.val()!==""){
-		socket.emit('chat message', m.val());
+		socket.emit('chatMessage', m.val());
 		m.val('');
 	}
 	return false;
 });
-socket.on('chat message', function(msg){
+socket.on('chatMessage', function(msg){
 	$('#messages').append($('<li>').text(msg));
 });
-socket.on('updateRooms',function(){
-	console.log('updateRooms'); //show list of rooms
+socket.on('updateThreads',function(data){
+	console.log('updateThreads');
+	$("#threads").text(data);
 });

@@ -5,20 +5,26 @@ module.exports = function(io){
   db.serialize(function() {
     db.run("CREATE TABLE if not exists threads (name TEXT)");
   });
-  var clients = {}, rooms = {};
+  var listOfThreads = ["swag"]; //load list of threads from database
   io.on('connection', function(socket){
+    socket.emit('updateThreads',listOfThreads);
     console.log('user connected');
-    socket.on('joinRoom',function(roomName){
-      db.run("INSERT INTO threads ('name') SELECT '"+roomName+"' WHERE NOT EXISTS (SELECT 1 FROM threads WHERE name='"+roomName+"')");
-      socket.join(roomName);
-      socket.room = roomName;
-      io.emit('updateRooms'); //send list of rooms
+    
+    socket.on('joinThread',function(threadName){
+      db.run("INSERT INTO threads ('name') VALUES ('"+threadName+"')");
+      socket.leave(socket.thread);
+      socket.join(threadName);
+      socket.thread = threadName;
+      listOfThreads.push(threadName);
+      io.emit('updateThreads',listOfThreads);
     });
+    
     socket.on('disconnect', function(){
       console.log('user disconnected');
     });
-    socket.on('chat message', function(msg){
-      io.in(socket.room).emit('chat message', msg);
+    
+    socket.on('chatMessage', function(msg){
+      io.in(socket.thread).emit('chatMessage', msg);
     });
   });
 }
