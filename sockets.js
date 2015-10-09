@@ -9,14 +9,15 @@ module.exports = function(io){
   io.on('connection', function(socket){
     socket.emit('updateThreads',listOfThreads);
     console.log('user connected');
-    
+    db.all("SELECT name FROM threads", function(err,rows){
+       io.emit("printThreads",rows);
+    });
     socket.on('joinThread',function(threadName){
       db.run("INSERT INTO threads ('name') VALUES ('"+threadName+"')");
       socket.leave(socket.thread);
       socket.join(threadName);
       socket.thread = threadName;
       listOfThreads.push(threadName);
-      io.emit('updateThreads',listOfThreads);
     });
     
     socket.on('disconnect', function(){

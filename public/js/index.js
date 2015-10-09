@@ -15,7 +15,9 @@ $('#messageForm').submit(function(){
 socket.on('chatMessage', function(msg){
 	$('#messages').append($('<li>').text(msg));
 });
-socket.on('updateThreads',function(data){
-	console.log('updateThreads');
-	$("#threads").text(data);
+socket.on('printThreads',function(data){
+	$("#threads").text("");
+	data.forEach(function(entry){
+		$("#threads").append(entry.name+"<br>");	
+	});
 });
