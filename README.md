@@ -1,1 +1,2 @@
 # WaffleThread
+npm install, gulp
