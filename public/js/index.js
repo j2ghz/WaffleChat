@@ -18,6 +18,9 @@ socket.on('chatMessage', function(msg){
 socket.on('printThreads',function(data){
 	$("#threads").text("");
 	data.forEach(function(entry){
-		$("#threads").append(entry.name+"<br>");	
+		$("#threads").append("<a href='#' class='joinThread' data-id='"+entry.id+"'>"+entry.name+"</a><br>");	
 	});
+	$("a.joinThread").click(function(){
+	socket.emit('joinThread',$(this).data('id'));
+});
 });
