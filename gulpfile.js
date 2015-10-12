@@ -1,7 +1,8 @@
 var gulp = require('gulp');
 var supervisor = require( "gulp-supervisor" );
+var open = require('gulp-open');
 
-gulp.task('default', ['supervisor'], function() {});
+gulp.task('default', ['supervisor','openurl'], function() {});
 gulp.task('supervisor', function() {
   supervisor( "./bin/www", {
           args: [],
@@ -16,4 +17,11 @@ gulp.task('supervisor', function() {
           forceWatch: true,
           quiet: false
       } );
+});
+gulp.task('openurl',function(){
+	var options = {
+		uri: 'http://localhost:3000',
+		app: 'chrome'
+	};
+  gulp.src(__filename).pipe(open(options));
 });
