@@ -2,8 +2,8 @@
 var socket = io();
 var m = $('#messageInput');
 
-$("button#joinThread").click(function(){
-	socket.emit('joinThread', prompt("Select thread"));
+$("button#createThread").click(function(){
+	socket.emit('createThread', prompt("Select thread"));
 });
 $('#messageForm').submit(function(){
 	if(m.val()!==""){
@@ -21,6 +21,7 @@ socket.on('printThreads',function(data){
 		$("#threads").append("<a href='#' class='joinThread' data-id='"+entry.id+"'>"+entry.name+"</a><br>");	
 	});
 	$("a.joinThread").click(function(){
-	socket.emit('joinThread',$(this).data('id'));
-});
+		socket.emit('joinThread',$(this).data('id'));
+		$("span#currentThread").text(" - "+$(this).text());
+	});
 });

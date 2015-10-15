@@ -13,12 +13,22 @@ module.exports = function(io){
     db.all("SELECT id,name FROM threads", function(err,rows){
        io.emit("printThreads",rows);
     });
-    socket.on('joinThread',function(threadName){
+    
+    socket.on('createThread',function(threadName){
       db.run("INSERT INTO threads ('id','name') VALUES ('"+uuid.v4()+"','"+threadName+"')");
       socket.leave(socket.thread);
       socket.join(threadName);
       socket.thread = threadName;
       listOfThreads.push(threadName);
+      db.all("SELECT id,name FROM threads", function(err,rows){
+        io.emit("printThreads",rows);
+      });
+    });
+    
+    socket.on('joinThread',function(threadName){
+      socket.leave(socket.thread);
+      socket.join(threadName);
+      socket.thread = threadName;
     });
     
     socket.on('disconnect', function(){
