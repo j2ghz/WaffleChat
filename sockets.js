@@ -1,11 +1,12 @@
 //this file exports the custom socket.io functionality to app.js and is provided the io object by app.js
-module.exports = function(io){
-  var sqlite3 = require('sqlite3').verbose();
-  var db = new sqlite3.Database('database/sqlite.db');
+module.exports = function(io,app,db){
   var uuid = require('node-uuid');
+  var listOfThreads = []; //load list of threads from database
+
   db.run("CREATE TABLE if not exists threads (id TEXT, name TEXT)");
   db.run("CREATE TABLE if not exists messages (thread TEXT, sender TEXT, content TEXT)");
-  var listOfThreads = ["swag"]; //load list of threads from database
+  db.run('CREATE TABLE if not exists users ( "id" INTEGER PRIMARY KEY AUTOINCREMENT,"username" TEXT,"password" TEXT,"salt" TEXT)');
+  
   io.on('connection', function(socket){
     socket.emit('updateThreads',listOfThreads);
     console.log('user connected');  
