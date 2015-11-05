@@ -6,16 +6,25 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http').Server(express);
 var socket_io = require('socket.io');
-var routes = require('./routes/index');
 var users = require('./routes/users');
-
+var passport = require('passport');
+var routes = require('./routes/index')(passport);
 //express
 var app = express();
+//database
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('database/sqlite.db');
+
+//passport
+app.use(passport.initialize());
+app.use(passport.session());
+var initPassport = require('./passport/init');
+initPassport(passport,db);
 
 //socket.io
 var io = socket_io(); //init socket.io
 app.io = io; //provide io object to /bin/www via module.export of app
-require('./sockets')(io); //use logic from sockets.js file and provide io object from this file
+require('./sockets')(io,app,db); //use logic from sockets.js file and provide io object from this file
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
