@@ -18,8 +18,12 @@ module.exports = function(passport){
   router.post('/login', 
   	passport.authenticate('local', { 
 		  successRedirect: '/good-login',
-          failureRedirect: '/bad-login' 
-	})
+      failureRedirect: '/bad-login',
+      failureFlash : true   
+	  })
   );
+  router.get('/good-login', isAuthenticated, function(req,res){
+	  res.render('index',{username:req.user.username});  
+  });
   return router;
 }
