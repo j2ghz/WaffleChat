@@ -5,26 +5,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http').Server(express);
-var socket_io = require('socket.io');
 var users = require('./routes/users');
-var passport = require('passport');
-var routes = require('./routes/index')(passport);
-//express
-var app = express();
+
 //database
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('database/sqlite.db');
 
-//passport
-app.use(passport.initialize());
-app.use(passport.session());
-var initPassport = require('./passport/init');
-initPassport(passport,db);
-
-//socket.io
-var io = socket_io(); //init socket.io
-app.io = io; //provide io object to /bin/www via module.export of app
-require('./sockets')(io,app,db); //use logic from sockets.js file and provide io object from this file
+//express
+var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -37,7 +25,25 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-//fix this to be used dynamically using sendfile app.use("/room", express.static(path.join(__dirname, 'public')));
+
+//passport
+var passport = require('passport');
+var expressSession = require('express-session');
+app.use(expressSession({secret:'someSecret'}));
+app.use(passport.initialize());
+app.use(passport.session());
+var initPassport = require('./passport/init');
+initPassport(passport,db);
+
+//add flash messages
+
+//socket.io
+var socket_io = require('socket.io');
+var io = socket_io(); //init socket.io
+app.io = io; //provide io object to /bin/www via module.export of app
+require('./sockets')(io,app,db); //use logic from sockets.js file and provide io object from this file
+
+var routes = require('./routes/index')(passport);
 app.use('/', routes);
 app.use('/users', users);
 

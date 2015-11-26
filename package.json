@@ -11,6 +11,8 @@
     "crypto": "0.0.3",
     "debug": "~2.2.0",
     "express": "~4.13.1",
+    "express-session": "^1.12.1",
+    "gulp": "^3.9.0",
     "gulp-open": "^1.0.0",
     "jade": "~1.11.0",
     "morgan": "~1.6.1",
