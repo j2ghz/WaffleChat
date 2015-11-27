@@ -29,7 +29,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 //passport
 var passport = require('passport');
 var expressSession = require('express-session');
-app.use(expressSession({secret:'someSecret'}));
+var FileStore = require('session-file-store')(expressSession);
+app.use(expressSession({
+  store:new FileStore(),
+  secret:'someSecret',
+  key:'express.sid',
+  name:"session",
+  resave:true,
+  saveUninitialized:false
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 var initPassport = require('./passport/init');

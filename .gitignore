@@ -27,3 +27,4 @@ build/Release
 node_modules
 build/config.gypi
 database/sqlite.db
+sessions
