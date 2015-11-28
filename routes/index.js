@@ -23,7 +23,9 @@ module.exports = function(passport){
 	  })
   );
   router.get('/good-login', isAuthenticated, function(req,res){
-	  res.render('index',{username:req.user.username});  
+	  res.render('index',{
+      username:req.user.username
+    });  
   });
   return router;
 }

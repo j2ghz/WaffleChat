@@ -10,6 +10,9 @@ var users = require('./routes/users');
 //database
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('database/sqlite.db');
+db.run("CREATE TABLE if not exists threads (id TEXT, name TEXT)");
+db.run("CREATE TABLE if not exists messages (thread TEXT, sender TEXT, content TEXT)");
+db.run('CREATE TABLE if not exists users ( "id" INTEGER PRIMARY KEY AUTOINCREMENT,"username" TEXT,"password" TEXT,"salt" TEXT)');
 
 //express
 var app = express();
@@ -18,6 +21,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+//parser, logger and pathing
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -26,8 +30,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//passport
-var passport = require('passport');
+//sessions
 var expressSession = require('express-session');
 var FileStore = require('session-file-store')(expressSession);
 var sessionMiddleware = expressSession({
@@ -39,6 +42,9 @@ var sessionMiddleware = expressSession({
   saveUninitialized:false
 })
 app.use(sessionMiddleware);
+
+//passport
+var passport = require('passport');
 app.use(passport.initialize());
 app.use(passport.session());
 var initPassport = require('./passport/init');
@@ -51,9 +57,10 @@ var io = require('socket.io')();
 io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
-app.io = io; //provide io object to /bin/www via module.export of app
+app.io = io; //provide io object to /bin/www via module.export of app to attach to server
 require('./sockets')(io,app,db); //use logic from sockets.js file and provide io object from this file
 
+//routes
 var routes = require('./routes/index')(passport);
 app.use('/', routes);
 app.use('/users', users);
