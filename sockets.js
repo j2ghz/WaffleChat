@@ -8,6 +8,7 @@ module.exports = function(io,app,db){
   db.run('CREATE TABLE if not exists users ( "id" INTEGER PRIMARY KEY AUTOINCREMENT,"username" TEXT,"password" TEXT,"salt" TEXT)');
   
   io.on('connection', function(socket){
+    console.log(socket.request.session);
     socket.emit('updateThreads',listOfThreads);
     console.log('user connected');  
     db.all("SELECT id,name FROM threads", function(err,rows){
