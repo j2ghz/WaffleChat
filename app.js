@@ -30,14 +30,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 var passport = require('passport');
 var expressSession = require('express-session');
 var FileStore = require('session-file-store')(expressSession);
-app.use(expressSession({
+var sessionMiddleware = expressSession({
   store:new FileStore(),
   secret:'someSecret',
   key:'express.sid',
   name:"session",
   resave:true,
   saveUninitialized:false
-}));
+})
+app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 var initPassport = require('./passport/init');
@@ -46,8 +47,10 @@ initPassport(passport,db);
 //add flash messages
 
 //socket.io
-var socket_io = require('socket.io');
-var io = socket_io(); //init socket.io
+var io = require('socket.io')();
+io.use(function(socket, next) {
+    sessionMiddleware(socket.request, socket.request.res, next);
+});
 app.io = io; //provide io object to /bin/www via module.export of app
 require('./sockets')(io,app,db); //use logic from sockets.js file and provide io object from this file
 
