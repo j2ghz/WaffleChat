@@ -3,7 +3,7 @@
 	// List of configurations. Add new configurations or edit existing ones.
 	// ONLY "node" and "mono" are supported, change "type" to switch.
 	"configurations": [
-		{
+	/*	{
 			// Name of configuration; appears in the launch configuration drop down menu.
 			"name": "Launch ./bin/www",
 			// Type of configuration. Possible values: "node", "mono".
@@ -28,15 +28,16 @@
 			"sourceMaps": false,
 			// If JavaScript source maps are enabled, the generated code is expected in this directory.
 			"outDir": null
-		},
+		},*/
 		{
 			"name": "Attach",
 			"type": "node",
 			// TCP/IP address. Default is "localhost".
-			"address": "localhost",
+			//"address": "localhost",
 			// Port to attach to.
 			"port": 5858, //TODO check
-			"sourceMaps": false
+			"sourceMaps": false,
+			"request": "attach"
 		}
 	]
 }
