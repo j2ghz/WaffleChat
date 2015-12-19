@@ -7,25 +7,29 @@ var isAuthenticated = function (req, res, next) {
 	if (req.isAuthenticated())
 		return next();
 	// if the user is not authenticated then redirect him to the login page
-	res.redirect('/');
+	res.redirect('/login');
 }
 
 module.exports = function(passport){
   /* GET home page. */
-  router.get('/', function(req, res, next) {
-    res.render('index');
-  }); 
-  router.post('/login', 
+  router.post('/loginform', 
   	passport.authenticate('local', { 
-		  successRedirect: '/good-login',
+		  successRedirect: '/',
       failureRedirect: '/bad-login',
       failureFlash : true   
 	  })
   );
-  router.get('/good-login', isAuthenticated, function(req,res){
+  router.get('/login', function(req,res){
+	  res.render('index');
+  });
+  router.get('/', isAuthenticated, function(req,res){
 	  res.render('index',{
       username:req.user.username
     });  
+  });
+  router.get('/logout', function(req, res){
+    req.logout();
+    res.redirect('/');
   });
   return router;
 }
