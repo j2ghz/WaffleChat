@@ -14,7 +14,11 @@ block content
     form(action='/loginform', method='POST')
       input(type='text', name='username', placeholder='Email',required, autofocus)
       input(type='password', name='password', placeholder='Password', required)
-      button(type='submit') Sign in
+      button(type='submit') Login
+    form(action='/signupform', method='POST')
+      input(type='text', name='username', placeholder='Email',required, autofocus)
+      input(type='password', name='password', placeholder='Password', required)
+      button(type='submit') Sign up
     script(src="https://cdn.socket.io/socket.io-1.2.0.js")
     script(src="http://code.jquery.com/jquery-1.11.1.js")
     script(src="js/index.js")
