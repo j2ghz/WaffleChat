@@ -1,6 +1,7 @@
+/* global db */
 //this file exports the custom socket.io functionality to app.js and is provided the io object by app.js
 var uuid = require('node-uuid');
-module.exports = function(io,app,db){
+module.exports = function(io){
   io.on('connection', function(socket){
     var ss = socket.conn.request.session;
     console.log(ss.passport === undefined ? 'user' + ' connected' : ss.passport.user + ' connected');  

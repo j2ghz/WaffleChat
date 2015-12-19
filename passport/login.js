@@ -1,6 +1,6 @@
 var LocalStrategy  = require('passport-local').Strategy;
 var crypto = require('crypto');
-module.exports = function(passport,db){
+module.exports = function(passport){
     function hashPassword(password, salt) {
         var hash = crypto.createHash('sha256');
         hash.update(password);

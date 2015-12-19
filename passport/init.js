@@ -1,5 +1,5 @@
 var login = require('./login');
-module.exports = function(passport,db){
+module.exports = function(passport){
     passport.serializeUser(function(user, done) {
         return done(null, user.id);
     });
