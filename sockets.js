@@ -4,7 +4,7 @@ var uuid = require('node-uuid');
 module.exports = function(io){
   io.on('connection', function(socket){
     var ss = socket.conn.request.session;
-    console.log(ss.passport === undefined ? 'user' + ' connected' : ss.passport.user + ' connected');  
+    console.log(ss.passport.user === undefined ? 'user' + ' connected' : ss.passport.user + ' connected');  
     //update socket's threads on connection
     db.all("SELECT id,name FROM threads", function(err,rows){
        socket.emit("printThreads",rows);
