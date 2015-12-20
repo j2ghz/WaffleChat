@@ -36,9 +36,11 @@ var expressSession = require('express-session');
 var FileStore = require('session-file-store')(expressSession);
 var sessionMiddleware = expressSession({
   store:new FileStore(),
-  secret:'someSecret',
-  key:'express.sid',
-  name:"session",
+  cookie:{
+    secure:false, /*https*/
+    maxAge:(1000 * 60 * 60 * 24 * 7)
+  },
+  secret:'seminarka',
   resave:true,
   saveUninitialized:true
 })
