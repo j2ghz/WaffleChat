@@ -2,8 +2,8 @@
 //this file exports the custom socket.io functionality to app.js and is provided the io object by app.js
 module.exports = function(io){
   io.on('connection', function(socket){
-    var passport = socket.conn.request.session.passport;
-    console.log(passport === undefined ? 'user connected' : (passport.user === undefined) ? 'user connected' : passport.user + ' connected');  
+    var session = socket.request.session;
+    console.log(session.passport === undefined ? 'user connected' : (session.passport.user === undefined) ? 'user connected' : session.passport.user + ' connected');  
     //update socket's threads on connection
     db.all("SELECT id,name FROM threads", function(err,rows){
        socket.emit("printThreads",rows);
@@ -31,7 +31,7 @@ module.exports = function(io){
     //on message being sent
     socket.on('message', function(msg){
       io.in(socket.thread).emit('message', msg);
-      db.run("INSERT INTO messages ('thread','content') VALUES ('"+socket.thread+"','"+msg+"')");
+      db.run("INSERT INTO messages ('thread','sender','content') VALUES ('"+socket.thread+"','"+session.passport.user+"','"+msg+"')");
     });
   });
 }
