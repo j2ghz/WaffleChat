@@ -11,7 +11,7 @@ var users = require('./routes/users');
 //database
 var sqlite3 = require('sqlite3').verbose();
 db = new sqlite3.Database('database/sqlite.db');
-db.run("CREATE TABLE if not exists threads (id TEXT, name TEXT)");
+db.run("CREATE TABLE if not exists threads (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
 db.run("CREATE TABLE if not exists messages (thread TEXT, sender TEXT, content TEXT)");
 db.run('CREATE TABLE if not exists users ( "id" INTEGER PRIMARY KEY AUTOINCREMENT,"username" TEXT,"password" TEXT,"salt" TEXT)');
 
@@ -40,7 +40,7 @@ var sessionMiddleware = expressSession({
   key:'express.sid',
   name:"session",
   resave:true,
-  saveUninitialized:false
+  saveUninitialized:true
 })
 app.use(sessionMiddleware);
 
@@ -56,7 +56,7 @@ initPassport(passport);
 //socket.io
 var io = require('socket.io')();
 io.use(function(socket, next) {
-    sessionMiddleware(socket.request, socket.request.res, next);
+    sessionMiddleware(socket.request, {}, next);
 });
 app.io = io; //provide io object to /bin/www via module.export of app to attach to server
 require('./sockets')(io); //use logic from sockets.js file and provide io object from this file
