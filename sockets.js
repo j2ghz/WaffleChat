@@ -1,18 +1,16 @@
 /* global db */
 //this file exports the custom socket.io functionality to app.js and is provided the io object by app.js
-var uuid = require('node-uuid');
 module.exports = function(io){
   io.on('connection', function(socket){
-    var ss = socket.conn.request.session;
-    console.log(ss.passport.user === undefined ? 'user' + ' connected' : ss.passport.user + ' connected');  
+    var passport = socket.conn.request.session.passport;
+    console.log(passport === undefined ? 'user connected' : (passport.user === undefined) ? 'user connected' : passport.user + ' connected');  
     //update socket's threads on connection
     db.all("SELECT id,name FROM threads", function(err,rows){
        socket.emit("printThreads",rows);
     });  
     //receiving createThread
     socket.on('createThread',function(threadName){
-      var threadId = uuid.v4(); //unique id
-      db.run("INSERT INTO threads ('id','name') VALUES ('"+threadId+"','"+threadName+"')");
+      db.run("INSERT INTO threads ('name') VALUES ('"+threadName+"')");
       db.all("SELECT id,name FROM threads", function(err,rows){
         io.emit("printThreads",rows); //update everyone's list upon creation of new one
       });
