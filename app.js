@@ -1,4 +1,3 @@
-/* global db */
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -7,13 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http').Server(express);
 var users = require('./routes/users');
-
-//database
-var sqlite3 = require('sqlite3').verbose();
-db = new sqlite3.Database('database/sqlite.db');
-db.run("CREATE TABLE if not exists threads (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
-db.run("CREATE TABLE if not exists messages (thread TEXT, sender TEXT, content TEXT)");
-db.run('CREATE TABLE if not exists users ( "id" INTEGER PRIMARY KEY AUTOINCREMENT,"username" TEXT,"password" TEXT,"salt" TEXT)');
 
 //express
 var app = express();
@@ -30,6 +22,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//database
+var db = require('./database/conn');
+db.run("CREATE TABLE if not exists threads (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
+db.run("CREATE TABLE if not exists messages (thread TEXT, sender TEXT, content TEXT)");
+db.run('CREATE TABLE if not exists users ( "id" INTEGER PRIMARY KEY AUTOINCREMENT,"username" TEXT,"password" TEXT,"salt" TEXT)');
 
 //sessions
 var expressSession = require('express-session');
