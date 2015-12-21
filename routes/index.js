@@ -26,7 +26,7 @@ module.exports = function(passport){
     res.redirect('/');
   });
   router.get('/login', function(req,res){
-	  res.render('index');
+	  res.render('login');
   });
   router.get('/', isAuthenticated, function(req,res){
 	  res.render('index',{
