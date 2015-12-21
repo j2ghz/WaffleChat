@@ -26,6 +26,9 @@ module.exports = function(io){
       db.all("SELECT thread,content FROM messages WHERE thread = ?",id,function(err,rows){
         socket.emit("printMessages",rows); //display messages to socket upon joining
       });
+      db.get("SELECT name FROM threads WHERE id = ?",id,function(err,row){
+        socket.emit("threadJoined",row.name);
+      });
     });
     
     //on disconnect of socket    
