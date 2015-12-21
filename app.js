@@ -5,7 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var http = require('http').Server(express);
-var users = require('./routes/users');
 
 //express
 var app = express();
@@ -64,7 +63,6 @@ require('./sockets')(io); //use logic from sockets.js file and provide io object
 //routes
 var routes = require('./routes/index')(passport);
 app.use('/', routes);
-app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
