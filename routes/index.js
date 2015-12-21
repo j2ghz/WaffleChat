@@ -11,31 +11,38 @@ var isAuthenticated = function (req, res, next) {
 	res.redirect('/login');
 }
 module.exports = function(passport){
-  /* GET home page. */
-  router.post('/loginform', 
-  	passport.authenticate('local', { 
-		  successRedirect: '/',
-      failureRedirect: '/bad-login',
-      failureFlash : true   
-	  })
-  );
-  router.post('/signupform',function(req,res){  //logic to be relocated
-    var username = req.body.username; //get post parameters
-    var password = req.body.password;
-  	signup(username,password);
-    res.redirect('/');
-  });
-  router.get('/login', function(req,res){
-	  res.render('login');
-  });
-  router.get('/', isAuthenticated, function(req,res){
-	  res.render('index',{
-      username:req.user.username
-    });  
-  });
-  router.get('/logout', function(req, res){
-    req.logout();
-    res.redirect('/');
-  });
-  return router;
+    router.post('/loginform', passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/bad-login',
+        failureFlash : true   
+    }));
+  
+    router.post('/signupform', function(req,res,next){
+        var username = req.body.username; //get post parameters
+        var password = req.body.password;
+  	    signup(username,password);
+        next(); //first sign up
+    });
+    router.post('/signupform', passport.authenticate('local', { //then automatically log in as new user
+        successRedirect: '/',
+        failureRedirect: '/bad-login',
+        failureFlash : true   
+	}));
+  
+    router.get('/login', function(req,res){
+	   res.render('login');
+    });
+  
+    router.get('/', isAuthenticated, function(req,res){
+        res.render('index',{
+            username:req.user.username
+        });  
+    });
+  
+    router.get('/logout', function(req, res){
+        req.logout();
+        res.redirect('/');
+    });
+    
+    return router;
 }
