@@ -20,7 +20,7 @@ module.exports = function(passport) {
     router.post('/signupform', function(req, res, next) {
         var username = req.body.username; //get post parameters
         var password = req.body.password;
-  	    signup(username,password);
+  	    signup(username, password);
         next(); //first sign up
     });
     router.post('/signupform', passport.authenticate('local', { //then automatically log in as new user
