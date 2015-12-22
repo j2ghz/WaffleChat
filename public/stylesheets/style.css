@@ -1,0 +1,12 @@
+#mainContainer{
+    position:fixed;
+    width:100%;
+    background-color:green;
+    bottom:0px;
+    display:flex;
+    flex-direction:column-reverse;
+    padding-bottom:50px;
+}
+.threadContainer{
+    background-color:blue;
+}
