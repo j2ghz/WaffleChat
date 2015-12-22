@@ -10,14 +10,14 @@ var isAuthenticated = function (req, res, next) {
 	// if the user is not authenticated then redirect him to the login page
 	res.redirect('/login');
 }
-module.exports = function(passport){
+module.exports = function(passport) {
     router.post('/loginform', passport.authenticate('local', {
         successRedirect: '/',
         failureRedirect: '/bad-login',
         failureFlash : true   
     }));
   
-    router.post('/signupform', function(req,res,next){
+    router.post('/signupform', function(req, res, next) {
         var username = req.body.username; //get post parameters
         var password = req.body.password;
   	    signup(username,password);
@@ -29,17 +29,17 @@ module.exports = function(passport){
         failureFlash : true   
 	}));
   
-    router.get('/login', function(req,res){
+    router.get('/login', function(req, res) {
 	   res.render('login');
     });
   
-    router.get('/', isAuthenticated, function(req,res){
-        res.render('index',{
+    router.get('/', isAuthenticated, function(req, res) {
+        res.render('index', {
             username:req.user.username
         });  
     });
   
-    router.get('/logout', function(req, res){
+    router.get('/logout', function(req, res) {
         req.logout();
         res.redirect('/');
     });
