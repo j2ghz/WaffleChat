@@ -4,7 +4,7 @@ var open = require('gulp-open');
 
 gulp.task('default', ['supervisor', 'openurl'], function() {});
 gulp.task('supervisor', function() {
-  supervisor( "./bin/www", {
+  supervisor("./bin/www", {
           args: [],
           ignore: [ "node_modules", ".git", "database", "sessions" ],
           pollInterval: 500,
