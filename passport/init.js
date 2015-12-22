@@ -1,7 +1,7 @@
 var db = require('../database/conn');
 var LocalStrategy  = require('passport-local').Strategy;
 var hashPassword = require('./hash');
-module.exports = function(passport){
+module.exports = function(passport) {
     passport.serializeUser(function(user, done) {
         return done(null, user.id);
     });
