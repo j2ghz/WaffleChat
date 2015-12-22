@@ -40,12 +40,11 @@ socket.on('createThreadElement', function(id, name) { //upon joining a thread, f
 
 socket.on('printMessages', function(messages, thread) { //print list of messages in given thread
     var ul = $('#thread' + thread + ' .messages');
+    ul.text('');
 	messages.forEach(function(message) {
 		ul.append('<li>' + message.content + '</li>');	
 	});
 });
-
-
 
 //sending and receiving a message
 function submitMessage(thread) { //on form submit
