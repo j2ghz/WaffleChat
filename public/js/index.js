@@ -45,6 +45,7 @@ socket.on('printMessages', function(messages, thread) { //print list of messages
 	messages.forEach(function(message) {
 		ul.append('<li>' + message.content + '</li>');	
 	});
+    scrollToLastMessage(thread);
 });
 
 //sending and receiving a message
@@ -58,16 +59,25 @@ function submitMessage(thread) { //on form submit
 
 socket.on('message', function(content, thread) {
 	$('#thread' + thread + ' .messages').append($('<li>').text(content));
+    scrollToLastMessage(thread);
 });
 
 //styling
-var resizeTimer
+var resizeTimer, heightOfRest = 60, padding = 5;
+
 function ulResize() {
     var h = $(".threadContainer").first().height();
-    console.log(h);
-    $("#chatContainer ul.messages").height(h - 100);  
+    $("#chatContainer ul.messages").height(h - heightOfRest - padding);  
 }
+
 $(window).resize(function() { 
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(ulResize, 250); //resize throttling
 });
+
+function scrollToLastMessage(thread) {
+    var $thread = $('#thread' + thread + ' ul');
+    $thread.animate({
+        scrollTop: $thread.height()
+    });
+}

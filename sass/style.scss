@@ -1,3 +1,5 @@
+$border-color:#aaa;
+
 body{
     margin-left:0;
 }
@@ -10,10 +12,9 @@ body{
     left:1%;
     position:fixed;
     width:98%;
-    bottom:0px;
+    bottom:25px;
     display:flex;
     flex-direction:row;
-    padding-bottom:25px;
     text-align:left;
     max-height:500px;
     height:50%;
@@ -26,35 +27,43 @@ body{
     max-width:992px;
     background-color:white;
     margin:0 2.5px;
-    box-shadow:0 0 3px #aaa;
-}
-
-.threadContainer h2{
-    background-color:#aaa;
-    margin-top:0;
-    margin-bottom:0;
-    padding:5px;
-    border:1px solid #aaa;
-}
-
-.threadContainer .messagesContainer{
-    border-left-style:solid;
-    border-right-style:solid;
-    border-width:1px;
-    border-color:#aaa; 
-}
-
-.threadContainer ul{
- /*   max-height:400px; javascript*/
- /*   height:200px;*/
-    overflow:auto;
-    list-style-type:none;
-    padding-left:0px;
-    margin-top:0px;
-    padding-top:16px;
-}
-
-.threadContainer form{
-    position:absolute;
-    bottom:0;
+    
+    
+    h2{
+        background-color: $border-color;
+        margin-top:0;
+        margin-bottom:0;
+        padding:5px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border:1px solid $border-color;
+    }
+    
+    .messagesContainer{
+        border-left-style:solid;
+        border-right-style:solid;
+        border-width:1px;
+        border-color: $border-color;
+        overflow:hidden;
+    }
+    
+    ul{
+        list-style-type:none;
+        padding-left:0px;
+        margin:0px;
+        padding-top:0px;
+        overflow:auto;
+        margin-bottom:5px + 21px; //padding in index.js + height of input, form is absolute position, border needs to expand using overflow:hidden in .messagesContainer to cover it
+    }
+    
+    form{
+        position:absolute;
+        bottom:0;
+        
+        input{
+            height:15px;
+            padding:1px 0;
+            border-width:2px;
+        }
+    }
 }
