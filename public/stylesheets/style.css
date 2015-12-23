@@ -1,12 +1,37 @@
+body{
+    margin-left:0;
+}
+
 #mainContainer{
+    margin-left:8px;
+}
+#chatContainer{
+    left:1%;
     position:fixed;
-    width:100%;
-    background-color:green;
+    width:98%;
     bottom:0px;
     display:flex;
-    flex-direction:column-reverse;
-    padding-bottom:50px;
+    flex-direction:row;
+    padding-bottom:25px;
+    text-align:left;
+    max-height:500px;
+    height:50%;
 }
+
 .threadContainer{
-    background-color:blue;
+    flex-basis:0px;
+    flex-grow:1;
+    position:relative;
+    max-width:992px;
+}
+
+.threadContainer ul{
+ /*   max-height:400px; javascript*/
+ /*   height:200px;*/
+    overflow:auto;
+}
+
+.threadContainer form{
+    position:absolute;
+    bottom:0;
 }
