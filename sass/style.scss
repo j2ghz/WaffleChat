@@ -25,7 +25,6 @@ body{
     flex-grow:1;
     position:relative;
     max-width:992px;
-    background-color:white;
     margin:0 2.5px;
     
     
@@ -37,6 +36,7 @@ body{
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
         border:1px solid $border-color;
+        position:relative;
     }
     
     .messagesContainer{
@@ -44,6 +44,8 @@ body{
         border-right-style:solid;
         border-width:1px;
         border-color: $border-color;
+        overflow:hidden;
+        background-color:white;
     }
     
     ul.messages{

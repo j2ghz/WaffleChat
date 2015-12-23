@@ -37,7 +37,8 @@ function Thread(id, name) { //creating new element for joining
 
 socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
     $('#chatContainer').append(Thread(id, name)); 
-    ulResize();
+    resizeElements();
+    makeCollapsible(id);
 });
 
 socket.on('printMessages', function(messages, thread) { //print list of messages in given thread
@@ -66,19 +67,31 @@ socket.on('message', function(content, thread) {
 //styling
 var resizeTimer, heightOfRest = 60, padding = 5;
 
-function ulResize() {
+function resizeElements() {
     var h = $(".threadContainer").first().height();
-    $("#chatContainer ul.messages").height(h - heightOfRest - padding);  
+    $("#chatContainer ul.messages").height(h - heightOfRest - padding);  //TODO reposition h2 of collapsed thread
 }
 
 $(window).resize(function() { 
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(ulResize, 250); //resize throttling
+        resizeTimer = setTimeout(resizeElements, 250); //resize throttling
 });
 
 function scrollToLastMessage(thread) {
     var ul = $('#thread' + thread + ' ul');
     ul.animate({
         scrollTop: ul[0].scrollHeight
+    });
+}
+
+function makeCollapsible(thread) {
+    $('#thread' + thread + ' h2').click(function() {
+        var container = $('#thread' + thread + ' .messagesContainer');
+        $(this).css('top', container.height());   
+        if (container.height() === 0) {
+            container.height('auto');
+        } else {
+            container.height(0);
+        }
     });
 }
