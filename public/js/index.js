@@ -89,13 +89,10 @@ function scrollToLastMessage(thread, animation) {
 }
 
 function makeCollapsible(thread) {
-    $('#thread' + thread + ' h2').click(function() {
-        var container = $('#thread' + thread + ' .messagesContainer');
-        $('#thread' + thread).css('top', container.height());   
-        if (container.height() === 0) {
-            container.height('auto');
-        } else {
-            container.height(0);
-        }
+    var thr = $('#thread' + thread);
+    var container = $('.messagesContainer', thr);
+    $('h2', thr).click(function() {   
+        thr.css('top', container.height());   
+        thr.toggleClass('collapsed');
     });
 }
