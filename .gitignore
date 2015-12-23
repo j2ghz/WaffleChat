@@ -28,3 +28,4 @@ node_modules
 build/config.gypi
 database/sqlite.db
 sessions
+public/stylesheets/style.css

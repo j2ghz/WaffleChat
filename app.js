@@ -13,6 +13,16 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+//sass
+var sassMiddleware = require('node-sass-middleware');
+app.use(sassMiddleware({
+    src: path.join(__dirname, 'sass'),
+    dest: path.join(__dirname, 'public/stylesheets'),
+    debug: true,
+    outputStyle: 'compressed',
+    prefix:  '/stylesheets'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
+}));
+
 //parser, logger and pathing
 //uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

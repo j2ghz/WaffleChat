@@ -6,7 +6,7 @@ gulp.task('default', ['supervisor', 'openurl'], function() {});
 gulp.task('supervisor', function() {
   supervisor("./bin/www", {
           args: [],
-          ignore: [ "node_modules", ".git", "database", "sessions" ],
+          ignore: [ "node_modules", ".git", "database", "sessions", "public/stylesheets"],
           pollInterval: 500,
           extensions: [ "js" ],
           exec: "node",
