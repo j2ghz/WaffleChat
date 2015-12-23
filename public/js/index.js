@@ -76,8 +76,8 @@ $(window).resize(function() {
 });
 
 function scrollToLastMessage(thread) {
-    var $thread = $('#thread' + thread + ' ul');
-    $thread.animate({
-        scrollTop: $thread.height()
+    var ul = $('#thread' + thread + ' ul');
+    ul.animate({
+        scrollTop: ul[0].scrollHeight
     });
 }
