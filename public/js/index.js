@@ -91,7 +91,7 @@ function scrollToLastMessage(thread, animation) {
 function makeCollapsible(thread) {
     $('#thread' + thread + ' h2').click(function() {
         var container = $('#thread' + thread + ' .messagesContainer');
-        $(this).css('top', container.height());   
+        $('#thread' + thread).css('top', container.height());   
         if (container.height() === 0) {
             container.height('auto');
         } else {
