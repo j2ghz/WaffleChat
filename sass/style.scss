@@ -44,26 +44,28 @@ body{
         border-right-style:solid;
         border-width:1px;
         border-color: $border-color;
-        overflow:hidden;
     }
     
-    ul{
+    ul.messages{
         list-style-type:none;
         padding-left:0px;
         margin:0px;
         padding-top:0px;
         overflow:auto;
-        margin-bottom:5px + 21px; //padding in index.js + height of input, form is absolute position, border needs to expand using overflow:hidden in .messagesContainer to cover it
     }
     
-    form{
-        position:absolute;
-        bottom:0;
-        
+    form.messageForm{
+               
         input{
-            height:15px;
+            height:21px;
             padding:1px 0;
             border-width:2px;
+            width:70%;
+            box-sizing:border-box;
+        }
+        
+        button{
+            width:30%;
         }
     }
 }

@@ -24,7 +24,8 @@ function Thread(id, name) { //creating new element for joining
         id: 'thread' + id
     });
     var content = ''; //insert empty list of messages and form into it
-    content += '<h2>' + name + '</h2><div class="messagesContainer">'
+    content += '<h2>' + name + '</h2>';
+    content += '<div class="messagesContainer">';
     content += '<ul class="messages"></ul>';
     content += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
     content += '<input autocomplete="off">';
