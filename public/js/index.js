@@ -47,7 +47,7 @@ socket.on('printMessages', function(messages, thread) { //print list of messages
 	messages.forEach(function(message) {
 		ul.append('<li>' + message.content + '</li>');	
 	});
-    scrollToLastMessage(thread);
+    scrollToLastMessage(thread, false);
 });
 
 //sending and receiving a message
@@ -61,7 +61,7 @@ function submitMessage(thread) { //on form submit
 
 socket.on('message', function(content, thread) {
 	$('#thread' + thread + ' .messages').append($('<li>').text(content));
-    scrollToLastMessage(thread);
+    scrollToLastMessage(thread, true);
 });
 
 //styling
@@ -77,11 +77,15 @@ $(window).resize(function() {
         resizeTimer = setTimeout(resizeElements, 250); //resize throttling
 });
 
-function scrollToLastMessage(thread) {
+function scrollToLastMessage(thread, animation) {
     var ul = $('#thread' + thread + ' ul');
+    var t = 0;
+    if (animation === true) {
+        t = 400;
+    }
     ul.animate({
-        scrollTop: ul[0].scrollHeight
-    });
+        scrollTop: ul[0].scrollHeight,
+    }, t);
 }
 
 function makeCollapsible(thread) {
