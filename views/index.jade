@@ -2,10 +2,11 @@ extends layout
 
 block content
   body
-    h1 WaffleThread - 
-      span(id="currentThread") Join a thread
-    h2 #{username}
-    button(id="createThread") Create a thread
-    ul(id="threads")
-    a(href='/logout') Logout
     div(id="mainContainer")
+        h1 WaffleThread - 
+        span(id="currentThread") Join a thread
+        h2 #{username}
+        button(id="createThread") Create a thread
+        ul(id="threads")
+        a(href='/logout') Logout
+    div(id="chatContainer")

@@ -35,7 +35,8 @@ function Thread(id, name) { //creating new element for joining
 }
 
 socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
-    $('#mainContainer').append(Thread(id, name)); 
+    $('#chatContainer').append(Thread(id, name)); 
+    ulResize();
 });
 
 socket.on('printMessages', function(messages, thread) { //print list of messages in given thread
@@ -57,4 +58,16 @@ function submitMessage(thread) { //on form submit
 
 socket.on('message', function(content, thread) {
 	$('#thread' + thread + ' .messages').append($('<li>').text(content));
+});
+
+//styling
+var resizeTimer
+function ulResize() {
+    var h = $(".threadContainer").first().height();
+    console.log(h);
+    $("#chatContainer ul.messages").height(h - 100);  
+}
+$(window).resize(function() { 
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(ulResize, 250); //resize throttling
 });
