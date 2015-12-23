@@ -28,8 +28,8 @@ body{
     max-width:992px;
     margin:0 2.5px;
     pointer-events:auto;
-    
-    
+    height:auto;
+    word-wrap:break-word;
     h2{
         background-color: $border-color;
         margin-top:0;
@@ -70,6 +70,20 @@ body{
         
         button{
             width:30%;
+        }
+    }
+    
+    &.collapsed{
+        max-width:100px;
+        
+        h2{
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        
+        .messagesContainer{
+            height:0;
         }
     }
 }
