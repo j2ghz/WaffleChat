@@ -5,6 +5,7 @@ body{
 #mainContainer{
     margin-left:8px;
 }
+
 #chatContainer{
     left:1%;
     position:fixed;
@@ -23,12 +24,34 @@ body{
     flex-grow:1;
     position:relative;
     max-width:992px;
+    background-color:white;
+    margin:0 2.5px;
+    box-shadow:0 0 3px #aaa;
+}
+
+.threadContainer h2{
+    background-color:#aaa;
+    margin-top:0;
+    margin-bottom:0;
+    padding:5px;
+    border:1px solid #aaa;
+}
+
+.threadContainer .messagesContainer{
+    border-left-style:solid;
+    border-right-style:solid;
+    border-width:1px;
+    border-color:#aaa; 
 }
 
 .threadContainer ul{
  /*   max-height:400px; javascript*/
  /*   height:200px;*/
     overflow:auto;
+    list-style-type:none;
+    padding-left:0px;
+    margin-top:0px;
+    padding-top:16px;
 }
 
 .threadContainer form{
