@@ -9,7 +9,7 @@ $('button#createThread').click(function() {
 socket.on('printThreads', function(threads) {
 	$('#threads').text('');
 	threads.forEach(function(thread) {
-		$('#threads').append('<li><a href="' + thread.id + '">' + thread.name + '</a></li>');	
+		$('#threads').append('<a href="' + thread.id + '"><li>' + thread.name + '</li></a>');	
 	});
 	$('#threads a').click(function(e) {
         e.preventDefault();
@@ -29,7 +29,6 @@ function Thread(id, name) { //creating new element for joining
     content += '<ul class="messages"></ul>';
     content += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
     content += '<input autocomplete="off">';
-    content += '<button>Send</button>';
     content += '</form></div>';
     div.html(content); //put content inside empty div
     return div;
@@ -65,11 +64,10 @@ socket.on('message', function(content, thread) {
 });
 
 //styling
-var resizeTimer, heightOfRest = 60, padding = 5;
-
+var resizeTimer;
 function resizeElements() {
     var h = $(".threadContainer").first().height();
-    $("#chatContainer ul.messages").height(h - heightOfRest - padding);  //TODO reposition h2 of collapsed thread
+    $("#chatContainer ul.messages").height(h);  
 }
 
 $(window).resize(function() { 
@@ -79,20 +77,20 @@ $(window).resize(function() {
 
 function scrollToLastMessage(thread, animation) {
     var ul = $('#thread' + thread + ' ul');
-    var t = 0;
+    var duration = 0;
     if (animation === true) {
-        t = 400;
+        duration = 400;
     }
     ul.animate({
         scrollTop: ul[0].scrollHeight,
-    }, t);
+    }, duration);
 }
 
 function makeCollapsible(thread) {
-    var thr = $('#thread' + thread);
-    var container = $('.messagesContainer', thr);
-    $('h2', thr).click(function() {   
-        thr.css('top', container.height());   
-        thr.toggleClass('collapsed');
+    var $thread = $('#thread' + thread);
+    var $container = $('.messagesContainer', $thread);
+    $('h2', $thread).click(function() {   
+        $thread.css('top', $container.height());   
+        $thread.toggleClass('collapsed');
     });
 }
