@@ -2,12 +2,13 @@ extends layout
 
 block content
   body
-    h1 WaffleThread
-    form(action='/loginform', method='POST')
-      input(type='text', name='username', placeholder='Username',required, autofocus)
-      input(type='password', name='password', placeholder='Password', required)
-      button(type='submit') Login
-    form(action='/signupform', method='POST')
-      input(type='text', name='username', placeholder='Username',required, autofocus)
-      input(type='password', name='password', placeholder='Password', required)
-      button(type='submit') Sign up
+    div(id="mainContainer")
+        h1 WaffleThread
+        form(action='/loginform', method='POST')
+            input(type='text', name='username', placeholder='Username',required, autofocus)
+            input(type='password', name='password', placeholder='Password', required)
+            button(type='submit') Login
+        form(action='/signupform', method='POST')
+            input(type='text', name='username', placeholder='Username',required, autofocus)
+            input(type='password', name='password', placeholder='Password', required)
+            button(type='submit') Sign up
