@@ -1,19 +1,61 @@
-$border-color:#aaa;
+$dark-orange:#f82;
+$light-orange:#f93;
+$footer-height:25px;
 
 body{
     margin-left:0;
     background-image:url('../images/background.gif');
+    font-family: Verdana, sans-serif;
+    font-size:0.8em;
+    overflow:hidden;
 }
 
+//main container and list of threads
 #mainContainer{
     margin-left:8px;
+    background-color:#fff;
+    max-width:992px;
+    height:100vh;
+    margin-right:auto;
+    margin-left:auto;
+    box-shadow:0px 20px 100px -20px #000;
+    padding-left:10px;
 }
 
+#threads{
+    list-style-type:none;
+    padding-left:0;
+    width:200px;
+    
+    a{       
+        color:#fff;
+        text-decoration:none;
+       
+        li{    
+            background-color:$dark-orange;
+            padding:10px;
+            margin-bottom:10px;
+            box-shadow: 0px 1px 3px #999;
+            transition: color 0.2s, box-shadow 0.2s, background-color 0.2s;      
+        }
+  
+        &:hover{
+            color:$dark-orange; 
+            
+            li{ 
+                background-color:#fff;
+                box-shadow: 0 1px 15px #999;
+            }
+        }
+    }
+}
+
+//chat windows
 #chatContainer{
     left:1%;
     position:fixed;
     width:98%;
-    bottom:25px;
+    bottom:61px + $footer-height;
     display:flex;
     flex-direction:row;
     text-align:left;
@@ -31,24 +73,24 @@ body{
     pointer-events:auto;
     height:auto;
     word-wrap:break-word;
+    
     h2{
-        background-color: $border-color;
+        background-color: $light-orange;
         margin-top:0;
         margin-bottom:0;
         padding:5px;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
-        border:1px solid $border-color;
         position:relative;
+        font-size:1.2em;
+        color:white;
+        cursor:pointer;
     }
     
     .messagesContainer{
-        border-left-style:solid;
-        border-right-style:solid;
-        border-width:1px;
-        border-color: $border-color;
         overflow:hidden;
         background-color:white;
+        box-shadow:0px 0px 10px -2px #000;
     }
     
     ul.messages{
@@ -57,6 +99,7 @@ body{
         margin:0px;
         padding-top:0px;
         overflow:auto;
+        margin-bottom:5px;
     }
     
     form.messageForm{
@@ -65,12 +108,9 @@ body{
             height:21px;
             padding:1px 0;
             border-width:2px;
-            width:70%;
-            box-sizing:border-box;
-        }
-        
-        button{
-            width:30%;
+            width:100%;
+            position:relative;
+            right:1px;
         }
     }
     
@@ -81,10 +121,20 @@ body{
             white-space:nowrap;
             overflow:hidden;
             text-overflow:ellipsis;
+            box-shadow:0px 2px 8px -2px #000;
         }
         
         .messagesContainer{
             height:0;
         }
     }
+}
+
+//footer
+footer{
+    position:fixed;
+    bottom:0;
+    background-color:$light-orange;
+    width:100%;
+    height:$footer-height;
 }
