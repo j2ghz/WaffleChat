@@ -64,10 +64,11 @@ socket.on('message', function(content, thread) {
 });
 
 //styling
-var resizeTimer;
+var resizeTimer, $chatContainer = $('#chatContainer');
 function resizeElements() {
-    var h = $(".threadContainer").first().height();
-    $("#chatContainer ul.messages").height(h);  
+    var h = $chatContainer.height();
+    $('.messages').height(h);
+    $('.collapsed h2').css('top', h + 25);
 }
 
 $(window).resize(function() { 
@@ -90,7 +91,7 @@ function makeCollapsible(thread) {
     var $thread = $('#thread' + thread);
     var $container = $('.messagesContainer', $thread);
     $('h2', $thread).click(function() {   
-        $thread.css('top', $container.height());   
+        $(this).css('top', $container.height() - 5);   
         $thread.toggleClass('collapsed');
     });
 }
