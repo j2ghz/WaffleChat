@@ -2,7 +2,7 @@ $border-color:#aaa;
 
 body{
     margin-left:0;
-    background-image:url('../images/background.png');
+    background-image:url('../images/background.gif');
 }
 
 #mainContainer{
@@ -26,7 +26,7 @@ body{
     flex-basis:0px;
     flex-grow:1;
     position:relative;
-    max-width:992px;
+    max-width:500px;
     margin:0 2.5px;
     pointer-events:auto;
     height:auto;
