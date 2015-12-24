@@ -64,11 +64,11 @@ socket.on('message', function(content, thread) {
 });
 
 //styling
-var resizeTimer, $chatContainer = $('#chatContainer');
-function resizeElements() {
+var resizeTimer, $chatContainer = $('#chatContainer'), $footer = $('footer');
+function resizeElements() { //get called whenever window is resized
     var h = $chatContainer.height();
-    $('.messages').height(h);
-    $('.collapsed h2').css('top', h + 25);
+    $('.messages').height(h); //set height of messages ul dynamically by container height (which is by 50% of window)
+    $('.collapsed h2').css('top', h + $footer.height()); //move collapsed tab when resizing
 }
 
 $(window).resize(function() { 
@@ -76,22 +76,22 @@ $(window).resize(function() {
         resizeTimer = setTimeout(resizeElements, 250); //resize throttling
 });
 
-function scrollToLastMessage(thread, animation) {
-    var ul = $('#thread' + thread + ' ul');
+function scrollToLastMessage(thread, animation) { //scroll to last message in given thread
+    var ul = $('#thread' + thread + ' ul'); //find appropriate thread
     var duration = 0;
     if (animation === true) {
         duration = 400;
     }
     ul.animate({
-        scrollTop: ul[0].scrollHeight,
+        scrollTop: ul[0].scrollHeight, //scroll to bottom
     }, duration);
 }
 
-function makeCollapsible(thread) {
+function makeCollapsible(thread) { //make thread collapsible
     var $thread = $('#thread' + thread);
     var $container = $('.messagesContainer', $thread);
-    $('h2', $thread).click(function() {   
-        $(this).css('top', $container.height() - 5);   
-        $thread.toggleClass('collapsed');
+    $('h2', $thread).click(function() {   //when you click tab
+        $(this).css('top', $container.height() - 5);   //move whole thread down
+        $thread.toggleClass('collapsed');  //hide messages and stuff
     });
 }
