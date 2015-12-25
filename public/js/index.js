@@ -160,7 +160,7 @@ function notifyOfNewMessage(id) {
                 clearTimeout(scrollTimer);
                 scrollTimer = setTimeout(function() {
                     if (isAtBottom($messages[id])) {
-                        hideNotification(id)
+                        hideNotification(id);
                         $messages[id].off('scroll'); //remove event listener once notification is removed
                     }
                 }, 1000);
@@ -170,7 +170,7 @@ function notifyOfNewMessage(id) {
 }
 
 function isAtBottom(messages) {
-    if ((messages.scrollTop() + messages.height()) === messages[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
+    if (Math.floor(messages.scrollTop() + messages.height()) === messages[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
         return true;
     } else {
         return false;
