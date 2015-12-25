@@ -102,44 +102,40 @@ function scrollToLastMessage(id, animation) { //scroll to last message in given 
 
 function makeCollapsible(id) { //make thread collapsible
     $h2[id].click(function() {   //when you click tab
-        $(this).css('top', $messagesContainer[id].height() - 5);   //move whole thread
+        $(this).css('top', $messagesContainer[id].height() - 5);   //move whole thread (if collapsed, height is 0, therefore it will move up and vice versa)
         $thread[id].toggleClass('collapsed');  //hide messages and form
         
-        if ($thread[id].hasClass('collapsed') === false && $i[id].hasClass('fa-envelope') === true) { //if is being notified and is no longer collapsed
+        if ($thread[id].hasClass('collapsed') === false && $i[id].hasClass('fa-envelope') === true) { //if notification is up and you uncollapse it
             scrollToLastMessage(id, true); //scroll down and remove notification
-            $i[id].addClass('fa-envelope-o');
-            $i[id].removeClass('fa-envelope');
+            hideNotification(id);
         }
     });
 }
 
 function notifyOfNewMessage(id) {
-    $i[id].removeClass('fa-envelope-o'); //show notification
-    $i[id].addClass('fa-envelope');
-    
+    showNotification(id); 
     /* removing notifications */
-    if ((isAtBottom($messages[id]) === true || $messages[id].hasScrollBar().vertical === false) && $thread[id].hasClass('collapsed') === false) {
-        /* notification will appear briefly on noncollapsed at bottom or not big enough to have a scrollbar */
-         var timer;
-         clearTimeout(timer);
-         timer = setTimeout(function() {
-            $i[id].addClass('fa-envelope-o');
-            $i[id].removeClass('fa-envelope');
-         }, 1000);   
-    }
-    
-    if ($thread[id].hasClass('collapsed') === false) {
-        var scrollTimer;
-        $messages[id].scroll(function() { //if you scroll down to bottom, remove notification
-            clearTimeout(scrollTimer);
-            scrollTimer = setTimeout(function() {
-                if (isAtBottom($messages[id])) {
-                    $i[id].addClass('fa-envelope-o');
-                    $i[id].removeClass('fa-envelope');
-                    $messages[id].off('scroll'); //remove event listener once notification is removed
-                }
-            }, 1000);
-        });
+    if ($thread[id].hasClass('collapsed') === false) { //functionality only on noncollapsed
+        if ((isAtBottom($messages[id]) === true) || ($messages[id].hasScrollBar().vertical === false)) {
+            /* notification will appear briefly if at bottom or not big enough to have a scrollbar */
+            var timer;
+            clearTimeout(timer);
+            timer = setTimeout(function() {
+                hideNotification(id);
+            }, 1000);   
+        } else {
+            //else when you scroll down remove notification
+            var scrollTimer;
+            $messages[id].scroll(function() { 
+                clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(function() {
+                    if (isAtBottom($messages[id])) {
+                        hideNotification(id)
+                        $messages[id].off('scroll'); //remove event listener once notification is removed
+                    }
+                }, 1000);
+            });
+        }
     }
 }
 
@@ -149,6 +145,16 @@ function isAtBottom(messages) {
     } else {
         return false;
     }
+}
+
+function hideNotification(id) {
+    $i[id].addClass('fa-envelope-o');
+    $i[id].removeClass('fa-envelope');
+}
+
+function showNotification(id) {
+    $i[id].addClass('fa-envelope');
+    $i[id].removeClass('fa-envelope-o');
 }
 
 (function($) { //helpful method to determine whether scrolling is possible or not
