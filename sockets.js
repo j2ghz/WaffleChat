@@ -32,10 +32,12 @@ module.exports = function(io) {
     });
     
     //on user joining thread
-    socket.on('joinThread', function(id, name) {
+    socket.on('joinThread', function(id) {
         if (socket.rooms.indexOf(id) === -1) {  
             socket.join(id);
-            socket.emit('createThreadElement', id, name);
+            db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) {
+                socket.emit('createThreadElement', id, row.name);  
+            });    
             db.all('SELECT content, sender FROM messages WHERE thread = ?', id, function(err, messagesRows) {
                 var counter = 0; //counter due to db being async
                 messagesRows.forEach(function(messagesRow) {
@@ -50,6 +52,11 @@ module.exports = function(io) {
 
             });
         }
+    });
+    
+    //on user leaving thread
+    socket.on('leaveThread', function(id) {
+        
     });
      
     //on message being sent
