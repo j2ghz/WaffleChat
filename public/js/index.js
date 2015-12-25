@@ -1,6 +1,7 @@
 /* global io from another file, provided by index.jade */
 var socket = io();
 var $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], $messagesContainer = [], $messages = [], $h2 = [], $i = [], $input = []; //caching jquery objects
+var myUsername = $('#mainContainer h2').text();
 
 //on connection
 $('button#createThread').click(function() {
@@ -59,7 +60,9 @@ function submitMessage(id) { //on form submit
 
 socket.on('message', function(content, thread, sender) {
     var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
-    notifyOfNewMessage(thread);
+    if (myUsername !== sender) {
+        notifyOfNewMessage(thread);   
+    }   
 	$messages[thread].append($('<li>').text(sender + ': ' + content));
     if (wasAtBottom === true) {
         scrollToLastMessage(thread, true);    
