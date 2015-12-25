@@ -1,5 +1,6 @@
 /* global io from another file, provided by index.jade */
 var socket = io();
+var $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], $messagesContainer = [], $messages = [], $h2 = [], $i = [], $input = []; //caching jquery objects
 
 //on connection
 $('button#createThread').click(function() {
@@ -7,11 +8,11 @@ $('button#createThread').click(function() {
 });
 
 socket.on('printThreads', function(threads) {
-	$('#threads').text('');
+	$threads.text('');
 	threads.forEach(function(thread) {
-		$('#threads').append('<a href="' + thread.id + '"><li>' + thread.name + '</li></a>');	
+		$threads.append('<a href="' + thread.id + '"><li>' + thread.name + '</li></a>');	
 	});
-	$('#threads a').click(function(e) {
+	$('a', $threads).click(function(e) {
         e.preventDefault();
 		socket.emit('joinThread', $(this).attr('href'), $(this).text());
 	});
@@ -35,26 +36,24 @@ function Thread(id, name) { //creating new element for joining
 }
 
 socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
-    $('#chatContainer').append(Thread(id, name)); 
+    $chatContainer.append(Thread(id, name)); 
     cacheNewObjects(id);
     resizeElements();
     makeCollapsible(id);
 });
 
-socket.on('printMessages', function(messages, thread) { //print list of messages in given thread
-    var ul = $('#thread' + thread + ' .messages');
-    ul.text('');
+socket.on('printMessages', function(messages, id) { //print list of messages in given thread
+    $messages[id].text('');
 	messages.forEach(function(message) {
-		ul.append('<li>' + message.content + '</li>');	
+		$messages[id].append('<li>' + message.content + '</li>');	
 	});
 });
 
 //sending and receiving a message
-function submitMessage(thread) { //on form submit
-    var input = $('#thread' + thread + ' input'); //find proper input
-    if (input.val() !== '') {
-        socket.emit('message', input.val(), thread);
-        input.val('');
+function submitMessage(id) { //on form submit
+    if ($input[id].val() !== '') {
+        socket.emit('message', $input[id].val(), id);
+        $input[id].val('');
     }
 }
 
@@ -69,8 +68,7 @@ socket.on('message', function(content, thread) {
 });
 
 //styling
-var resizeTimer, $chatContainer = $('#chatContainer'), $footer = $('footer'); //caching jquery objects
-var $thread = [], $messagesContainer = [], $messages = [], $h2 = [], $i = [];
+var resizeTimer, scrolltimer;
 
 function cacheNewObjects(thread) {
     $thread[thread] = $('#thread' + thread);
@@ -78,6 +76,7 @@ function cacheNewObjects(thread) {
     $messages[thread] = $('.messages', $thread[thread]);
     $h2[thread] = $('h2', $thread[thread]);
     $i[thread] = $('i', $h2[thread]);
+    $input[thread] = $('input', $thread[thread]);
 }
 
 function resizeElements() { //gets called whenever window is resized
