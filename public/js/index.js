@@ -45,7 +45,7 @@ socket.on('createThreadElement', function(id, name) { //upon joining a thread, f
 socket.on('printMessages', function(messages, id) { //print list of messages in given thread
     $messages[id].text('');
 	messages.forEach(function(message) {
-		$messages[id].append('<li>' + message.content + '</li>');	
+		$messages[id].append('<li>' + message.sender + ': ' + message.content + '</li>');	
 	});
 });
 
@@ -57,12 +57,11 @@ function submitMessage(id) { //on form submit
     }
 }
 
-socket.on('message', function(content, thread) {
-    var $messages = $('#thread' + thread + ' .messages');
-    var atBottom = isAtBottom($messages); //needs to be determined before appending the new message
+socket.on('message', function(content, thread, sender) {
+    var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
     notifyOfNewMessage(thread);
-	$messages.append($('<li>').text(content));
-    if (atBottom === true) {
+	$messages[thread].append($('<li>').text(sender + ': ' + content));
+    if (wasAtBottom === true) {
         scrollToLastMessage(thread, true);    
     }   
 });
