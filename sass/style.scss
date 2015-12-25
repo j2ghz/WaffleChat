@@ -87,9 +87,13 @@ body{
     position:relative;
     max-width:500px;
     margin:0 2.5px;
-    pointer-events:auto;
+    pointer-events: none;
     height:auto;
     word-wrap:break-word;
+    
+    *{
+        pointer-events:auto;
+    }
     
     h2{
         background-color: $light-orange;
