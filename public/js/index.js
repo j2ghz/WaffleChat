@@ -38,7 +38,7 @@ function Thread(id, name) { //creating new element for joining
 socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
     $chatContainer.append(Thread(id, name)); 
     cacheNewObjects(id);
-    resizeElements();
+    resizeMessages();
     makeCollapsible(id);
 });
 
@@ -79,7 +79,7 @@ function cacheNewObjects(thread) {
     $input[thread] = $('input', $thread[thread]);
 }
 
-function resizeElements() { //gets called whenever window is resized
+function resizeMessages() { //gets called whenever window is resized
     var h = $chatContainer.height();
     $('.messages').height(h); //set height of all messages ul dynamically by container height (which is by 50% of window)
     $('.collapsed h2').css('top', h + $footer.height()); //move collapsed tab when resizing
@@ -87,7 +87,7 @@ function resizeElements() { //gets called whenever window is resized
 
 $(window).resize(function() { 
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(resizeElements, 250); //resize throttling
+        resizeTimer = setTimeout(resizeMessages, 250); //resize throttling
 });
 
 function scrollToLastMessage(id, animation) { //scroll to last message in given thread
