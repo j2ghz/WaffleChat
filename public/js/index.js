@@ -163,7 +163,7 @@ function notifyOfNewMessage(id) {
                         hideNotification(id);
                         $messages[id].off('scroll'); //remove event listener once notification is removed
                     }
-                }, 1000);
+                }, 250);
             });
         }
     }
