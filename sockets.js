@@ -36,14 +36,14 @@ module.exports = function(io) {
         if (socket.rooms.indexOf(id) === -1) {  
             socket.join(id);
             socket.emit('createThreadElement', id, name);
-            db.all('SELECT content, sender FROM messages WHERE thread = ?', id, function(err, rows) {
-                var counter = 0;
-                rows.forEach(function(row) {
-                    db.get('SELECT username FROM users WHERE id = ?', row.sender, function(err, r) {
-                        row.sender = r.username;
+            db.all('SELECT content, sender FROM messages WHERE thread = ?', id, function(err, messagesRows) {
+                var counter = 0; //counter due to db being async
+                messagesRows.forEach(function(messagesRow) {
+                    db.get('SELECT username FROM users WHERE id = ?', messagesRow.sender, function(err, usersRow) {
+                        messagesRow.sender = usersRow.username;
                         counter++;
-                        if(counter === rows.length) {
-                            socket.emit('printMessages', rows, id); //display messages to socket upon joining
+                        if(counter === messagesRows.length) {
+                            socket.emit('printMessages', messagesRows, id); //display messages to socket upon joining
                         }
                     });
                 });
