@@ -7,6 +7,7 @@ module.exports = function(io) {
         if (session.passport.user !== undefined) {
             db.get('SELECT username FROM users WHERE id = ?', session.passport.user, function(err, row) {
                 socket.username = row.username;
+                socket.userid = session.passport.user;
                 console.log(socket.username + ' connected'); 
             }); 
         } else {
@@ -62,7 +63,7 @@ module.exports = function(io) {
     //on message being sent
     socket.on('message', function(content, thread) {
         io.in(thread).emit('message', content, thread, socket.username);
-        db.run("INSERT INTO messages ('thread', 'sender', 'content') VALUES (?, ?, ?)", thread, session.passport.user, content);
+        db.run("INSERT INTO messages ('thread', 'sender', 'content') VALUES (?, ?, ?)", thread, socket.userid, content);
     });
     
     //on disconnect of socket    
