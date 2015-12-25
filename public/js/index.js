@@ -46,7 +46,6 @@ socket.on('printMessages', function(messages, thread) { //print list of messages
 	messages.forEach(function(message) {
 		ul.append('<li>' + message.content + '</li>');	
 	});
-    scrollToLastMessage(thread, false);
 });
 
 //sending and receiving a message
@@ -59,8 +58,15 @@ function submitMessage(thread) { //on form submit
 }
 
 socket.on('message', function(content, thread) {
-	$('#thread' + thread + ' .messages').append($('<li>').text(content));
-    scrollToLastMessage(thread, true);
+    var $messages = $('#thread' + thread + ' .messages')
+    var isAtBottom = false;
+    if (($messages.scrollTop() + $messages.height()) === $messages[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
+        isAtBottom = true;
+    }
+	$messages.append($('<li>').text(content));
+    if (isAtBottom === true) {
+        scrollToLastMessage(thread, true);    
+    }   
 });
 
 //styling
