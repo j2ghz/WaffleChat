@@ -56,7 +56,7 @@ module.exports = function(io) {
     
     //on user leaving thread
     socket.on('leaveThread', function(id) {
-        
+        socket.leave(id);
     });
      
     //on message being sent

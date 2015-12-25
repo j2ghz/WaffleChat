@@ -1,6 +1,7 @@
 /* global io from another file, provided by index.jade */
 var socket = io();
-var $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], $messagesContainer = [], $messages = [], $h2 = [], $i = [], $input = []; //caching jquery objects
+var $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
+    $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = []; //caching jquery objects
 var myUsername = $('#mainContainer h2').text();
 
 //socket behaviour
@@ -26,13 +27,6 @@ socket.on('printThreads', function(threads) {
 	});
 });
 
-socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
-    $chatContainer.append(Thread(id, name)); 
-    cacheNewObjects(id);
-    resizeMessages();
-    makeCollapsible(id);
-});
-
 socket.on('printMessages', function(messages, id) { //print list of messages in given thread
     $messages[id].text('');
 	messages.forEach(function(message) {
@@ -51,16 +45,40 @@ socket.on('message', function(content, thread, sender) {
     }   
 });
 
+socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
+    $chatContainer.append(Thread(id, name)); 
+    cacheObjects(id);
+    resizeMessages();
+    makeCollapsible(id);
+    $close[id].click(function() {
+        socket.emit('leaveThread', id);
+        $thread[id].remove();
+        removeObjects(id);
+    });
+});
+
 //styling and functions
 var resizeTimer;
 
-function cacheNewObjects(thread) {
+function cacheObjects(thread) {
     $thread[thread] = $('#thread' + thread);
     $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
     $messages[thread] = $('.messages', $thread[thread]);
     $h2[thread] = $('h2', $thread[thread]);
-    $i[thread] = $('i', $h2[thread]);
+    $notification[thread] = $('i.notification', $h2[thread]);
     $input[thread] = $('input', $thread[thread]);
+    $close[thread] = $('i.close', $h2[thread]);
+}
+
+function removeObjects(thread) {
+    $thread[thread].remove();
+    $thread[thread] = undefined;
+    $messagesContainer[thread] = undefined;
+    $messages[thread] = undefined;
+    $h2[thread] = undefined;
+    $notification[thread] = undefined;
+    $input[thread] = undefined;
+    $close[thread] = undefined;
 }
 
 function Thread(id, name) { //creating new element for joining
@@ -69,7 +87,7 @@ function Thread(id, name) { //creating new element for joining
         id: 'thread' + id
     });
     var content = ''; //insert empty list of messages and form into it
-    content += '<h2><i class="fa fa-envelope-o"></i> ' + name + '</h2>';
+    content += '<h2><i class="fa fa-envelope-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h2>';
     content += '<div class="messagesContainer">';
     content += '<ul class="messages"></ul>';
     content += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
@@ -118,7 +136,7 @@ function collapse(id){
     $h2[id].css('top', $messagesContainer[id].height() - 5);   //move whole thread (if collapsed, height is 0, therefore it will move up and vice versa)
     $thread[id].toggleClass('collapsed');  //hide messages and form
     
-    if ($thread[id].hasClass('collapsed') === false && $i[id].hasClass('fa-envelope') === true) { //if notification is up and you uncollapse it
+    if ($thread[id].hasClass('collapsed') === false && $notification[id].hasClass('fa-envelope') === true) { //if notification is up and you uncollapse it
         scrollToLastMessage(id, true); //scroll down and remove notification
         hideNotification(id);
     }  
@@ -160,13 +178,13 @@ function isAtBottom(messages) {
 }
 
 function hideNotification(id) {
-    $i[id].addClass('fa-envelope-o');
-    $i[id].removeClass('fa-envelope');
+    $notification[id].addClass('fa-envelope-o');
+    $notification[id].removeClass('fa-envelope');
 }
 
 function showNotification(id) {
-    $i[id].addClass('fa-envelope');
-    $i[id].removeClass('fa-envelope-o');
+    $notification[id].addClass('fa-envelope');
+    $notification[id].removeClass('fa-envelope-o');
 }
 
 (function($) { //helpful method to determine whether scrolling is possible or not
