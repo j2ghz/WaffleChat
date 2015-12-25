@@ -68,7 +68,7 @@ socket.on('message', function(content, thread) {
 });
 
 //styling
-var resizeTimer, scrolltimer;
+var resizeTimer;
 
 function cacheNewObjects(thread) {
     $thread[thread] = $('#thread' + thread);
@@ -120,17 +120,19 @@ function notifyOfNewMessage(id) {
     /* removing notifications */
     if ((isAtBottom($messages[id]) === true || $messages[id].hasScrollBar().vertical === false) && $thread[id].hasClass('collapsed') === false) {
         /* notification will appear briefly on noncollapsed at bottom or not big enough to have a scrollbar */
-         clearTimeout(timeout);
-         var timeout = setTimeout(function() {
+         var timer;
+         clearTimeout(timer);
+         timer = setTimeout(function() {
             $i[id].addClass('fa-envelope-o');
             $i[id].removeClass('fa-envelope');
          }, 1000);   
     }
     
     if ($thread[id].hasClass('collapsed') === false) {
+        var scrollTimer;
         $messages[id].scroll(function() { //if you scroll down to bottom, remove notification
-            clearTimeout(messageScrollTimer);
-            var messageScrollTimer = setTimeout(function() {
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(function() {
                 if (isAtBottom($messages[id])) {
                     $i[id].addClass('fa-envelope-o');
                     $i[id].removeClass('fa-envelope');
