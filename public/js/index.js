@@ -36,6 +36,7 @@ function Thread(id, name) { //creating new element for joining
 
 socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
     $('#chatContainer').append(Thread(id, name)); 
+    cacheNewObjects(id);
     resizeElements();
     makeCollapsible(id);
 });
@@ -69,10 +70,19 @@ socket.on('message', function(content, thread) {
 
 //styling
 var resizeTimer, $chatContainer = $('#chatContainer'), $footer = $('footer'); //caching jquery objects
+var $thread = [], $messagesContainer = [], $messages = [], $h2 = [], $i = [];
+
+function cacheNewObjects(thread) {
+    $thread[thread] = $('#thread' + thread);
+    $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
+    $messages[thread] = $('.messages', $thread[thread]);
+    $h2[thread] = $('h2', $thread[thread]);
+    $i[thread] = $('i', $h2[thread]);
+}
 
 function resizeElements() { //gets called whenever window is resized
     var h = $chatContainer.height();
-    $('.messages').height(h); //set height of messages ul dynamically by container height (which is by 50% of window)
+    $('.messages').height(h); //set height of all messages ul dynamically by container height (which is by 50% of window)
     $('.collapsed h2').css('top', h + $footer.height()); //move collapsed tab when resizing
 }
 
@@ -81,67 +91,59 @@ $(window).resize(function() {
         resizeTimer = setTimeout(resizeElements, 250); //resize throttling
 });
 
-function scrollToLastMessage(thread, animation) { //scroll to last message in given thread
-    var ul = $('#thread' + thread + ' ul'); //find appropriate thread
+function scrollToLastMessage(id, animation) { //scroll to last message in given thread
     var duration = 0;
     if (animation === true) {
         duration = 400;
     }
-    ul.animate({
-        scrollTop: ul[0].scrollHeight, //scroll to bottom
+    $messages[id].animate({
+        scrollTop: $messages[id][0].scrollHeight, //scroll to bottom
     }, duration);
 }
 
-function makeCollapsible(thread) { //make thread collapsible
-    var $thread = $('#thread' + thread); //caching jquery objects
-    var $container = $('.messagesContainer', $thread);
-    var $i = $('h2 i', $thread);
-    
-    $('h2', $thread).click(function() {   //when you click tab
-        $(this).css('top', $container.height() - 5);   //move whole thread
-        $thread.toggleClass('collapsed');  //hide messages and form
+function makeCollapsible(id) { //make thread collapsible
+    $h2[id].click(function() {   //when you click tab
+        $(this).css('top', $messagesContainer[id].height() - 5);   //move whole thread
+        $thread[id].toggleClass('collapsed');  //hide messages and form
         
-        if ($thread.hasClass('collapsed') === false && $i.hasClass('fa-envelope') === true) { //if is being notified and is no longer collapsed
-            scrollToLastMessage(thread, true); //scroll down and remove notification
-            $i.addClass('fa-envelope-o');
-            $i.removeClass('fa-envelope');
+        if ($thread[id].hasClass('collapsed') === false && $i[id].hasClass('fa-envelope') === true) { //if is being notified and is no longer collapsed
+            scrollToLastMessage(id, true); //scroll down and remove notification
+            $i[id].addClass('fa-envelope-o');
+            $i[id].removeClass('fa-envelope');
         }
     });
 }
 
-function notifyOfNewMessage(thread) {
-    var $thread =  $('#thread' + thread);
-    var $messages = $('.messages', $thread);
-    var $i = $('h2 i', $thread);
-    $i.removeClass('fa-envelope-o'); //show notification
-    $i.addClass('fa-envelope');
+function notifyOfNewMessage(id) {
+    $i[id].removeClass('fa-envelope-o'); //show notification
+    $i[id].addClass('fa-envelope');
     
     /* removing notifications */
-    if ((isAtBottom($messages) === true || $messages.hasScrollBar().vertical === false) && $thread.hasClass('collapsed') === false) {
+    if ((isAtBottom($messages[id]) === true || $messages[id].hasScrollBar().vertical === false) && $thread[id].hasClass('collapsed') === false) {
         /* notification will appear briefly on noncollapsed at bottom or not big enough to have a scrollbar */
          clearTimeout(timeout);
          var timeout = setTimeout(function() {
-            $i.addClass('fa-envelope-o');
-            $i.removeClass('fa-envelope');
+            $i[id].addClass('fa-envelope-o');
+            $i[id].removeClass('fa-envelope');
          }, 1000);   
     }
     
-    if ($thread.hasClass('collapsed') === false) {
-        $messages.scroll(function() { //if you scroll down to bottom, remove notification
+    if ($thread[id].hasClass('collapsed') === false) {
+        $messages[id].scroll(function() { //if you scroll down to bottom, remove notification
             clearTimeout(messageScrollTimer);
             var messageScrollTimer = setTimeout(function() {
-                if (isAtBottom($messages)) {
-                    $i.addClass('fa-envelope-o');
-                    $i.removeClass('fa-envelope');
-                    $messages.off('scroll'); //remove event listener once notification is removed
+                if (isAtBottom($messages[id])) {
+                    $i[id].addClass('fa-envelope-o');
+                    $i[id].removeClass('fa-envelope');
+                    $messages[id].off('scroll'); //remove event listener once notification is removed
                 }
             }, 1000);
         });
     }
 }
 
-function isAtBottom($messages) {
-    if (($messages.scrollTop() + $messages.height()) === $messages[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
+function isAtBottom(messages) {
+    if ((messages.scrollTop() + messages.height()) === messages[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
         return true;
     } else {
         return false;
