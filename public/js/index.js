@@ -58,7 +58,7 @@ socket.on('createThreadElement', function(id, name) { //upon joining a thread, f
 });
 
 //styling and functions
-var resizeTimer, inputHeight = 27, h2Height = 37, h2Padding = 5;
+var resizeTimer, inputHeight = 27, h2Height = 37;
 
 function cacheObjects(thread) {
     $thread[thread] = $('#thread' + thread);
@@ -108,7 +108,7 @@ function submitMessage(id) { //on form submit
 function resizeMessages() { //gets called whenever window is resized
     var chatHeight = $chatContainer.height();
     $('.messages').height(chatHeight - h2Height - inputHeight); //set height of all messages ul dynamically by container height (which is by 50% of window)
-    $('.collapsed h2').css('top', chatHeight - h2Height + h2Padding); //move collapsed tab when resizing
+    $('.collapsed h2').css('top', chatHeight - h2Height); //move collapsed tab when resizing
 }
 
 $(window).resize(function() { 
