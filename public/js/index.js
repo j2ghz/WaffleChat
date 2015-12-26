@@ -136,7 +136,7 @@ function collapse(id){
     $h2[id].css('top', $messagesContainer[id].height());   //move whole thread (if collapsed, height is 0, therefore it will move up and vice versa)
     $thread[id].toggleClass('collapsed');  //hide messages and form
     
-    if ($thread[id].hasClass('collapsed') === false && $notification[id].hasClass('fa-envelope') === true) { //if notification is up and you uncollapse it
+    if ($thread[id].hasClass('collapsed') === false && $notification[id].hasClass('fa-comment') === true) { //if notification is up and you uncollapse it
         scrollToLastMessage(id, true); //scroll down and remove notification
         hideNotification(id);
     }  
