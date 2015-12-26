@@ -71,7 +71,7 @@ body{
     left:1%;
     position:fixed;
     width:98%;
-    bottom:56px + $footer-height;
+    bottom:$footer-height;
     display:flex;
     flex-direction:row;
     text-align:left;
@@ -99,19 +99,21 @@ body{
         margin-top:0;
         margin-bottom:0;
         padding:5px;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
         position:relative;
         font-size:1.2em;
         color:white;
         cursor:pointer;
         position:relative;
         bottom:0px;
-        padding-left:2.5em;
-        padding-right:1.5em;
+        padding-left:3em;
+        padding-right:2em;
         overflow:hidden;
         text-overflow:ellipsis;
         word-wrap:initial;
+        line-height:1.8em;
+        font-size:1em;
         
         .notification{
             position:absolute;
@@ -122,16 +124,13 @@ body{
         .close{
             position:absolute;
             top:0.5em;
-            right:0.3em;
+            right:0em;
         }
         
         i{
-            width:1em;
+            width:1.3em;
+            font-size:1.3em;
         }
-    }
-    
-    &:not(.collapsed) h2{
-        top:0px !important;
     }
     
     .messagesContainer{
@@ -163,7 +162,8 @@ body{
     }
     
     &.collapsed{
-        max-width:150px;
+        flex-grow:0.5;
+        max-width:250px;
         
         h2{
             white-space:nowrap;
@@ -188,8 +188,3 @@ footer{
     width:100%;
     height:$footer-height;
 }
-
-.fa-envelope-o{
-    visibility:hidden;
-}
-
