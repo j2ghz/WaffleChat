@@ -58,7 +58,7 @@ socket.on('createThreadElement', function(id, name) { //upon joining a thread, f
 });
 
 //styling and functions
-var resizeTimer;
+var resizeTimer, inputHeight = 27, h2Height = 37, h2Padding = 5;
 
 function cacheObjects(thread) {
     $thread[thread] = $('#thread' + thread);
@@ -87,7 +87,7 @@ function Thread(id, name) { //creating new element for joining
         id: 'thread' + id
     });
     var content = ''; //insert empty list of messages and form into it
-    content += '<h2><i class="fa fa-envelope-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h2>';
+    content += '<h2><i class="fa fa-comment-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h2>';
     content += '<div class="messagesContainer">';
     content += '<ul class="messages"></ul>';
     content += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
@@ -106,9 +106,9 @@ function submitMessage(id) { //on form submit
 }
 
 function resizeMessages() { //gets called whenever window is resized
-    var h = $chatContainer.height();
-    $('.messages').height(h); //set height of all messages ul dynamically by container height (which is by 50% of window)
-    $('.collapsed h2').css('top', h + $footer.height()); //move collapsed tab when resizing
+    var chatHeight = $chatContainer.height();
+    $('.messages').height(chatHeight - h2Height - inputHeight); //set height of all messages ul dynamically by container height (which is by 50% of window)
+    $('.collapsed h2').css('top', chatHeight - h2Height + h2Padding); //move collapsed tab when resizing
 }
 
 $(window).resize(function() { 
@@ -133,7 +133,7 @@ function makeCollapsible(id) { //make thread collapsible
 }
 
 function collapse(id){
-    $h2[id].css('top', $messagesContainer[id].height() - 5);   //move whole thread (if collapsed, height is 0, therefore it will move up and vice versa)
+    $h2[id].css('top', $messagesContainer[id].height());   //move whole thread (if collapsed, height is 0, therefore it will move up and vice versa)
     $thread[id].toggleClass('collapsed');  //hide messages and form
     
     if ($thread[id].hasClass('collapsed') === false && $notification[id].hasClass('fa-envelope') === true) { //if notification is up and you uncollapse it
@@ -178,13 +178,13 @@ function isAtBottom(messages) {
 }
 
 function hideNotification(id) {
-    $notification[id].addClass('fa-envelope-o');
-    $notification[id].removeClass('fa-envelope');
+    $notification[id].addClass('fa-comment-o');
+    $notification[id].removeClass('fa-comment');
 }
 
 function showNotification(id) {
-    $notification[id].addClass('fa-envelope');
-    $notification[id].removeClass('fa-envelope-o');
+    $notification[id].addClass('fa-comment');
+    $notification[id].removeClass('fa-comment-o');
 }
 
 (function($) { //helpful method to determine whether scrolling is possible or not
