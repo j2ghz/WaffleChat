@@ -89,6 +89,7 @@ body{
     pointer-events: none;
     height:auto;
     word-wrap:break-word;
+    margin-top:5px;
     
     *{
         pointer-events:auto;
@@ -149,7 +150,6 @@ body{
     }
     
     form.messageForm{
-        margin-bottom:5px; 
                
         input{
             height:21px;
