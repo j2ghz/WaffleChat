@@ -108,7 +108,7 @@ function submitMessage(id) { //on form submit
 function resizeMessages() { //gets called whenever window is resized
     var chatHeight = $chatContainer.height();
     $('.messages').height(chatHeight - h2Height - inputHeight); //set height of all messages ul dynamically by container height (which is by 50% of window)
-    $('.collapsed h2').css('top', chatHeight - h2Height); //move collapsed tab when resizing
+    $('.collapsed h2').css('top', chatHeight - h2Height + 2); //move collapsed tab when resizing
 }
 
 $(window).resize(function() { 
