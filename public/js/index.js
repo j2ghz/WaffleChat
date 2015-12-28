@@ -1,65 +1,68 @@
 /* global io from another file, provided by index.jade */
-var socket = io();
-var $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
-    $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = []; //caching jquery objects
-var myUsername = $('#mainContainer h2').text();
+var socket = io(),
+    $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
+    $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects
+    myUsername = $('#mainContainer h2').text(), resizeTimer, inputHeight = 27, h2Height = 37;
 
-//socket behaviour
+//Create Thread button functionality
 $('button#createThread').click(function() {
 	socket.emit('createThread', prompt('Select thread'));
 });
 
+//print list of threads and allow user to join them
 socket.on('printThreads', function(threads) {
 	$threads.text('');
 	threads.forEach(function(thread) {
 		$threads.append('<a href="' + thread.id + '"><li>' + thread.name + '</li></a>');	
 	});
-	$('a', $threads).click(function(e) {
+	$('a', $threads).click(function(e) { //when you click on thread, join it
         e.preventDefault();
         var id = $(this).attr('href')
-        if ($thread[id] === undefined) {
+        if ($thread[id] === undefined) { //if not already joined, join
             socket.emit('joinThread', id); 
         } else {
-             if ($thread[id].hasClass('collapsed') === true) {
+             if ($thread[id].hasClass('collapsed') === true) { //else uncollapse already joined thread
                  collapse(id);
              }
         }
 	});
 });
 
-socket.on('printMessages', function(messages, id) { //print list of messages in given thread
-    $messages[id].text('');
-	messages.forEach(function(message) {
-		$messages[id].append('<li>' + message.sender + ': ' + message.content + '</li>');	
-	});
-});
-
-socket.on('message', function(content, thread, sender) {
-    var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
-    if (myUsername !== sender) {
-        notifyOfNewMessage(thread);   
-    }   
-	$messages[thread].append($('<li>').text(sender + ': ' + content));
-    if (wasAtBottom === true) {
-        scrollToLastMessage(thread, true);    
-    }   
-});
-
-socket.on('createThreadElement', function(id, name) { //upon joining a thread, first create a new Thread div
+//upon joining a thread, first create a new Thread div
+socket.on('createThreadElement', function(id, name) {
     $chatContainer.append(Thread(id, name)); 
-    cacheObjects(id);
-    resizeMessages();
-    makeCollapsible(id);
-    $close[id].click(function() {
+    cacheObjects(id); //put objects in $variables
+    resizeMessages(); //resize elements by window height
+    makeCollapsible(id); //collapsing behaviour
+    $close[id].click(function() { //close icon functionality
         socket.emit('leaveThread', id);
         $thread[id].remove();
         removeObjects(id);
     });
 });
 
-//styling and functions
-var resizeTimer, inputHeight = 27, h2Height = 37;
+//after joining and creation of element, print all messages
+socket.on('printMessages', function(messages, id) {
+    $messages[id].text('');
+	messages.forEach(function(message) {
+		$messages[id].append('<li>' + message.sender + ': ' + message.content + '</li>');	
+	});
+});
 
+//on receiving a message
+socket.on('message', function(content, thread, sender) {
+    var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
+    if (myUsername !== sender) { //if someone else sends it, notify
+        notifyOfNewMessage(thread);   
+    }   
+	$messages[thread].append($('<li>').text(sender + ': ' + content));
+    if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
+        scrollToLastMessage(thread, true);    
+    }   
+});
+
+//styling and display behaviour of app
+//caching objects into $variable[threadid] reference
 function cacheObjects(thread) {
     $thread[thread] = $('#thread' + thread);
     $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
@@ -70,6 +73,7 @@ function cacheObjects(thread) {
     $close[thread] = $('i.close', $h2[thread]);
 }
 
+//removing object references and removing thread element on leaving
 function removeObjects(thread) {
     $thread[thread].remove();
     $thread[thread] = undefined;
@@ -99,24 +103,27 @@ function Thread(id, name) { //creating new element for joining
 
 //sending a message
 function submitMessage(id) { //on form submit
-    if ($input[id].val() !== '') {
-        socket.emit('message', $input[id].val(), id);
-        $input[id].val('');
+    if ($input[id].val() !== '') { //if not empty
+        socket.emit('message', $input[id].val(), id); //send value and thread id to server
+        $input[id].val(''); //set input value back to nothing
     }
 }
 
-function resizeMessages() { //gets called whenever window is resized
+//gets called whenever window is resized and upon creation of new thread window
+function resizeMessages() { 
     var chatHeight = $chatContainer.height();
-    $('.messages').height(chatHeight - h2Height - inputHeight); //set height of all messages ul dynamically by container height (which is by 50% of window)
+    $('.messages').height(chatHeight - h2Height - inputHeight); //set height of all ul.messages dynamically by container height (which is by 50% of window)
     $('.collapsed h2').css('top', chatHeight - h2Height + 2); //move collapsed tab when resizing
 }
 
+//resize ul.messages on window resize
 $(window).resize(function() { 
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(resizeMessages, 250); //resize throttling
 });
 
-function scrollToLastMessage(id, animation) { //scroll to last message in given thread
+//scroll to last message in given thread, animation boolean
+function scrollToLastMessage(id, animation) { 
     var duration = 0;
     if (animation === true) {
         duration = 400;
@@ -126,12 +133,14 @@ function scrollToLastMessage(id, animation) { //scroll to last message in given 
     }, duration);
 }
 
-function makeCollapsible(id) { //make thread collapsible
-    $h2[id].click(function() {   //when you click tab
+//make thread collapsible
+function makeCollapsible(id) { 
+    $h2[id].click(function() {   //when you click tab, toggle collapsing
         collapse(id);
     });
 }
 
+//collapse given thread
 function collapse(id){
     $h2[id].css('top', $messagesContainer[id].height());   //move whole thread (if collapsed, height is 0, therefore it will move up and vice versa)
     $thread[id].toggleClass('collapsed');  //hide messages and form
@@ -142,23 +151,24 @@ function collapse(id){
     }  
 }
 
+//notify of new message
 function notifyOfNewMessage(id) {
     showNotification(id); 
-    /* removing notifications */
-    if ($thread[id].hasClass('collapsed') === false) { //functionality only on noncollapsed
+    //removing notifications 
+    if ($thread[id].hasClass('collapsed') === false) { //if not collapsed
         if ((isAtBottom($messages[id]) === true) || ($messages[id].hasScrollBar().vertical === false)) {
-            /* notification will appear briefly if at bottom or not big enough to have a scrollbar */
+            // notification will appear briefly if at bottom or thread not big enough to have a scrollbar
             var timer;
             clearTimeout(timer);
-            timer = setTimeout(function() {
+            timer = setTimeout(function() { //after 1 second hide
                 hideNotification(id);
             }, 1000);   
         } else {
-            //else when you scroll down remove notification
+            //else remove notification when you scroll down 
             var scrollTimer;
             $messages[id].scroll(function() { 
                 clearTimeout(scrollTimer);
-                scrollTimer = setTimeout(function() {
+                scrollTimer = setTimeout(function() { //throttling
                     if (isAtBottom($messages[id])) {
                         hideNotification(id);
                         $messages[id].off('scroll'); //remove event listener once notification is removed
@@ -169,6 +179,7 @@ function notifyOfNewMessage(id) {
     }
 }
 
+//checks if is scrolled to bottom in given thread
 function isAtBottom(messages) {
     if (Math.floor(messages.scrollTop() + messages.height()) === messages[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
         return true;
@@ -177,6 +188,7 @@ function isAtBottom(messages) {
     }
 }
 
+//hides or shows notification in given thread
 function hideNotification(id) {
     $notification[id].addClass('fa-comment-o');
     $notification[id].removeClass('fa-comment');
@@ -187,7 +199,8 @@ function showNotification(id) {
     $notification[id].removeClass('fa-comment-o');
 }
 
-(function($) { //helpful method to determine whether scrolling is possible or not
+//helpful method to determine whether scrolling is possible or not
+(function($) { 
     $.fn.hasScrollBar = function() {
         var e = this.get(0);
         return {
