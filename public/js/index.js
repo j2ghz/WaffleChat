@@ -2,7 +2,7 @@
 var socket = io(),
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
     $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects
-    myUsername = $('#mainContainer h2').text(), resizeTimer, inputHeight = 27, h2Height = 37;
+    myUsername = $('#mainContainer h2').text(), resizeTimer, notificationTimer, inputHeight, h2Height; //TODO calculate input
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
@@ -31,7 +31,10 @@ socket.on('printThreads', function(threads) {
 //upon joining a thread, first create a new Thread div
 socket.on('createThreadElement', function(id, name) {
     $chatContainer.append(Thread(id, name)); 
-    cacheObjects(id); //put objects in $variables
+    if ($thread.length === 0) { //if this is the first window to be created, set boolean to true
+        var first = true;
+    }
+    cacheObjects(id, first); //put objects in $variables
     resizeMessages(); //resize elements by window height
     makeCollapsible(id); //collapsing behaviour
     $close[id].click(function() { //close icon functionality
@@ -62,8 +65,8 @@ socket.on('message', function(content, thread, sender) {
 });
 
 //styling and display behaviour of app
-//caching objects into $variable[threadid] reference
-function cacheObjects(thread) {
+//caching objects into $variable[threadid] reference, if first is provided, cache height of elements for resizing as well
+function cacheObjects(thread, first) {
     $thread[thread] = $('#thread' + thread);
     $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
     $messages[thread] = $('.messages', $thread[thread]);
@@ -71,6 +74,10 @@ function cacheObjects(thread) {
     $notification[thread] = $('i.notification', $h2[thread]);
     $input[thread] = $('input', $thread[thread]);
     $close[thread] = $('i.close', $h2[thread]);
+    if (first) {
+        inputHeight = $input[thread].outerHeight();
+        h2Height = $h2[thread].outerHeight();
+    }
 }
 
 //removing object references and removing thread element on leaving
@@ -113,7 +120,7 @@ function submitMessage(id) { //on form submit
 function resizeMessages() { 
     var chatHeight = $chatContainer.height();
     $('.messages').height(chatHeight - h2Height - inputHeight); //set height of all ul.messages dynamically by container height (which is by 50% of window)
-    $('.collapsed h2').css('top', chatHeight - h2Height + 2); //move collapsed tab when resizing
+    $('.threadContainer.collapsed').css('top', chatHeight - h2Height); //move collapsed tab when resizing
 }
 
 //resize ul.messages on window resize
@@ -125,9 +132,7 @@ $(window).resize(function() {
 //scroll to last message in given thread, animation boolean
 function scrollToLastMessage(id, animation) { 
     var duration = 0;
-    if (animation === true) {
-        duration = 400;
-    }
+    if (animation === true) { duration = 400; }
     $messages[id].animate({
         scrollTop: $messages[id][0].scrollHeight, //scroll to bottom
     }, duration);
@@ -142,8 +147,13 @@ function makeCollapsible(id) {
 
 //collapse given thread
 function collapse(id){
-    $h2[id].css('top', $messagesContainer[id].height());   //move whole thread (if collapsed, height is 0, therefore it will move up and vice versa)
-    $thread[id].toggleClass('collapsed');  //hide messages and form
+    $thread[id].toggleClass('collapsed'); //different display of header
+    
+    if ($thread[id].hasClass('collapsed') === true) {
+        $thread[id].css('top', $messagesContainer[id].height());    
+    } else {
+        $thread[id].css('top', 0);  
+    }
     
     if ($thread[id].hasClass('collapsed') === false && $notification[id].hasClass('fa-comment') === true) { //if notification is up and you uncollapse it
         scrollToLastMessage(id, true); //scroll down and remove notification
@@ -158,9 +168,8 @@ function notifyOfNewMessage(id) {
     if ($thread[id].hasClass('collapsed') === false) { //if not collapsed
         if ((isAtBottom($messages[id]) === true) || ($messages[id].hasScrollBar().vertical === false)) {
             // notification will appear briefly if at bottom or thread not big enough to have a scrollbar
-            var timer;
-            clearTimeout(timer);
-            timer = setTimeout(function() { //after 1 second hide
+            clearTimeout(notificationTimer);
+            notificationTimer = setTimeout(function() { //after 1 second hide
                 hideNotification(id);
             }, 1000);   
         } else {
