@@ -1,6 +1,5 @@
 $dark-orange:#f82;
 $light-orange:#f93;
-$footer-height:25px;
 
 @font-face{
     font-family:header;
@@ -71,7 +70,7 @@ body{
     left:1%;
     position:fixed;
     width:98%;
-    bottom:$footer-height;
+    bottom:3px;
     display:flex;
     flex-direction:row;
     text-align:left;
@@ -165,18 +164,14 @@ body{
     &.collapsed{
         flex-grow:0.5;
         max-width:250px;
-        
+       
         h2{
             box-shadow:0px 2px 8px -2px #000;
+            height:2.5em;
+            
+            &.notifying{
+                 background-color:$dark-orange;
+            }
         }
     }
-}
-
-//footer
-footer{
-    position:fixed;
-    bottom:0;
-    background-color:$light-orange;
-    width:100%;
-    height:$footer-height;
 }
