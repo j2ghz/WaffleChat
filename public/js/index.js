@@ -200,11 +200,13 @@ function isAtBottom(messages) {
 //hides or shows notification in given thread
 function hideNotification(id) {
     $notification[id].addClass('fa-comment-o');
+    $h2[id].removeClass('notifying');
     $notification[id].removeClass('fa-comment');
 }
 
 function showNotification(id) {
     $notification[id].addClass('fa-comment');
+    $h2[id].addClass('notifying');
     $notification[id].removeClass('fa-comment-o');
 }
 
