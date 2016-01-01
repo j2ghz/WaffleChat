@@ -11,7 +11,6 @@ body{
     background-image:url('../images/background.gif');
     font-family: Verdana, sans-serif;
     font-size:0.8em;
-    overflow:hidden;
 }
 
 //main container and list of threads
@@ -19,14 +18,14 @@ body{
     margin-left:8px;
     background-color:#fff;
     max-width:992px;
-    height:100vh;
+    min-height:100vh;
     margin-right:auto;
     margin-left:auto;
     box-shadow:0px 20px 100px -20px #000;
-    padding-left:10px;
-    padding-right:10px;
+    padding:10px;
     
     h1{
+        margin-top:10px;
         font-family:header;
         font-size:6em;
         font-weight:normal;
@@ -54,7 +53,20 @@ body{
             line-height:2em;
             overflow:hidden;
             text-overflow:ellipsis; 
-            position:relative;
+            position:relative;        
+        
+            .threadFlex {
+                display:flex;
+                
+                span{
+                    flex-grow:1;
+                    flex-basis:0px;
+                }
+            }
+            
+            .threadNewMessages {
+                text-align:right;
+            }
         }
   
         &:hover{
@@ -145,11 +157,25 @@ body{
     
     ul.messages{
         list-style-type:none;
-        padding-left:0px;
+        padding-left:5px;
         margin:0px;
         padding-top:0px;
         overflow:auto;
         line-height:150%;
+        position:relative;
+    }
+    
+    .messageDate {
+        position:absolute;
+        right:5px;
+    }
+    
+    .messageSender {
+        color:#333;
+        margin-right:5px;
+        &::after{
+            content:':';
+        }
     }
     
     form.messageForm{
