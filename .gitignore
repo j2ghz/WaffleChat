@@ -29,3 +29,4 @@ build/config.gypi
 database/sqlite.db
 sessions
 public/stylesheets
+typings
