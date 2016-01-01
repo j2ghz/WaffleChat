@@ -20,14 +20,15 @@ module.exports = function(io) {
     }
     
     //on connection list all threads
-    db.all('SELECT id, name FROM threads', function(err, rows) {
+    db.all('SELECT id, name, creator, lastActivity FROM threads', function(err, rows) {
         socket.emit('printThreads', rows);
     });  
     
     //on user creating a thread
     socket.on('createThread', function(name) {
-        db.run("INSERT INTO threads ('name') VALUES (?)", name);
-        db.all('SELECT id, name FROM threads', function(err, rows) {
+        var d = new Date().toJSON();
+        db.run("INSERT INTO threads ('name', 'creator', 'lastActivity') VALUES (?, ?, ?)", name, socket.username, d);
+        db.all('SELECT id, name, creator, lastActivity FROM threads', function(err, rows) {
             io.emit('printThreads', rows); //update everyone's list upon creation of new one
         });
     });
@@ -37,20 +38,10 @@ module.exports = function(io) {
         if (socket.rooms.indexOf(id) === -1) {  
             socket.join(id);
             db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) {
-                socket.emit('createThreadElement', id, row.name);  
+                socket.emit('joinThreadSuccess', id, row.name);  
             });    
-            db.all('SELECT content, sender FROM messages WHERE thread = ?', id, function(err, messagesRows) {
-                var counter = 0; //counter due to db being async
-                messagesRows.forEach(function(messagesRow) {
-                    db.get('SELECT username FROM users WHERE id = ?', messagesRow.sender, function(err, usersRow) {
-                        messagesRow.sender = usersRow.username;
-                        counter++;
-                        if(counter === messagesRows.length) {
-                            socket.emit('printMessages', messagesRows, id); //display messages to socket upon joining
-                        }
-                    });
-                });
-
+            db.all('SELECT content, sender, date FROM messages WHERE thread = ?', id, function(err, messagesRows) {
+                socket.emit('printMessages', messagesRows, id); //display messages to socket upon joining
             });
         }
     });
@@ -62,8 +53,11 @@ module.exports = function(io) {
      
     //on message being sent
     socket.on('message', function(content, thread) {
-        io.in(thread).emit('message', content, thread, socket.username);
-        db.run("INSERT INTO messages ('thread', 'sender', 'content') VALUES (?, ?, ?)", thread, socket.userid, content);
+        var d = new Date().toJSON();
+        io.in(thread).emit('message', content, thread, socket.username, d);
+        io.emit('notifyInThreadList', thread, socket.username, d);
+        db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d);
+        db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);
     });
     
     //on disconnect of socket    

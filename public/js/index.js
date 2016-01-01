@@ -2,7 +2,7 @@
 var socket = io(),
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
     $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects
-    myUsername = $('#mainContainer h2').text(), resizeTimer, notificationTimer, inputHeight, h2Height; //TODO calculate input
+    myUsername = $('#mainContainer h2').text(), myThreads = [], resizeTimer, notificationTimer, inputHeight, h2Height; //TODO calculate input
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
@@ -13,12 +13,12 @@ $('button#createThread').click(function() {
 socket.on('printThreads', function(threads) {
 	$threads.text('');
 	threads.forEach(function(thread) {
-		$threads.append('<a href="' + thread.id + '"><li>' + thread.name + '</li></a>');	
-	});
+		$threads.append(ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity));	
+	});    
 	$('a', $threads).click(function(e) { //when you click on thread, join it
         e.preventDefault();
         var id = $(this).attr('href')
-        if ($thread[id] === undefined) { //if not already joined, join
+        if (myThreads.indexOf(id) === -1) { //if not already joined, join
             socket.emit('joinThread', id); 
         } else {
              if ($thread[id].hasClass('collapsed') === true) { //else uncollapse already joined thread
@@ -29,17 +29,18 @@ socket.on('printThreads', function(threads) {
 });
 
 //upon joining a thread, first create a new Thread div
-socket.on('createThreadElement', function(id, name) {
-    $chatContainer.append(Thread(id, name)); 
-    if ($thread.length === 0) { //if this is the first window to be created, set boolean to true
+socket.on('joinThreadSuccess', function(id, name) {
+    $chatContainer.append(ThreadWindow(id, name)); 
+    if (myThreads.length === 0) { //if this is the first window to be created, set boolean to true
         var first = true;
     }
+    myThreads.push(id);
     cacheObjects(id, first); //put objects in $variables
     resizeMessages(); //resize elements by window height
     makeCollapsible(id); //collapsing behaviour
     $close[id].click(function() { //close icon functionality
         socket.emit('leaveThread', id);
-        $thread[id].remove();
+        myThreads.splice(myThreads.indexOf(id), 1);
         removeObjects(id);
     });
 });
@@ -48,20 +49,24 @@ socket.on('createThreadElement', function(id, name) {
 socket.on('printMessages', function(messages, id) {
     $messages[id].text('');
 	messages.forEach(function(message) {
-		$messages[id].append('<li>' + message.sender + ': ' + message.content + '</li>');	
+		$messages[id].append(Message(message.sender, message.content, message.date));	
 	});
 });
 
 //on receiving a message
-socket.on('message', function(content, thread, sender) {
+socket.on('message', function(content, thread, sender, date) {
     var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
     if (myUsername !== sender) { //if someone else sends it, notify
         notifyOfNewMessage(thread);   
     }   
-	$messages[thread].append($('<li>').text(sender + ': ' + content));
+	$messages[thread].append(Message(sender, content, date));
     if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
         scrollToLastMessage(thread, true);    
     }   
+});
+
+socket.on('notifyInThreadList', function(thread, name, date) {
+
 });
 
 //styling and display behaviour of app
@@ -92,7 +97,7 @@ function removeObjects(thread) {
     $close[thread] = undefined;
 }
 
-function Thread(id, name) { //creating new element for joining
+function ThreadWindow(id, name) { //creating new element for joining
     var div = $('<div/>', { //create empty div
         class: 'threadContainer',
         id: 'thread' + id
@@ -106,6 +111,24 @@ function Thread(id, name) { //creating new element for joining
     content += '</form></div>';
     div.html(content); //put content inside empty div
     return div;
+}
+
+function ThreadListItem(id, name, creator, lastActivity) {
+    var a = $('<a/>', {
+        href: id
+    });
+    var content = '';
+    content += '<li><span class="threadName">' + name + '</span><span class="threadCreator">' + creator + '</span><span class="threadLastActivity">' + lastActivity + '</span></li>';
+    a.html(content);
+    return a;
+}
+
+function Message(sender, content, date) {
+  var li = $('<li/>');  
+  var d = new Date(date);
+  var x = sender + ': ' + content + d;
+  li.html(x);
+  return li;
 }
 
 //sending a message
