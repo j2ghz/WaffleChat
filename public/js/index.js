@@ -28,8 +28,8 @@ socket.on('printThreads', function(threads) {
 	});
 });
 
-//upon joining a thread, first create a new Thread div
-socket.on('joinThreadSuccess', function(id, name) {
+//after joining and creation of element, print all messages
+socket.on('printMessages', function(messages, id, name) {
     $chatContainer.append(ThreadWindow(id, name)); 
     if (myThreads.length === 0) { //if this is the first window to be created, set boolean to true
         var first = true;
@@ -43,10 +43,6 @@ socket.on('joinThreadSuccess', function(id, name) {
         myThreads.splice(myThreads.indexOf(id), 1);
         removeObjects(id);
     });
-});
-
-//after joining and creation of element, print all messages
-socket.on('printMessages', function(messages, id) {
     $messages[id].text('');
 	messages.forEach(function(message) {
 		$messages[id].append(Message(message.sender, message.content, message.date));	
@@ -65,8 +61,10 @@ socket.on('message', function(content, thread, sender, date) {
     }   
 });
 
-socket.on('notifyInThreadList', function(thread, name, date) {
-
+socket.on('notifyInThreadList', function(thread, date) {  
+    $('#threads a[href=' + thread+ '] .threadLastActivity .value').text(showDate(new Date(date)));
+    var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
+    $number.text(Number($number.text()) + 1);
 });
 
 //styling and display behaviour of app
@@ -101,8 +99,8 @@ function ThreadWindow(id, name) { //creating new element for joining
     var div = $('<div/>', { //create empty div
         class: 'threadContainer',
         id: 'thread' + id
-    });
-    var content = ''; //insert empty list of messages and form into it
+    }),
+    content = ''; //insert empty list of messages and form into it
     content += '<h2><i class="fa fa-comment-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h2>';
     content += '<div class="messagesContainer">';
     content += '<ul class="messages"></ul>';
@@ -116,17 +114,22 @@ function ThreadWindow(id, name) { //creating new element for joining
 function ThreadListItem(id, name, creator, lastActivity) {
     var a = $('<a/>', {
         href: id
-    });
-    var content = '';
-    content += '<li><span class="threadName">' + name + '</span><span class="threadCreator">' + creator + '</span><span class="threadLastActivity">' + lastActivity + '</span></li>';
+    }),
+    d = new Date(lastActivity),
+        content = '';
+    content += '<li><div class="threadName">' + name + '</div><div class="threadFlex">';
+    content += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
+    content += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(d) + '</span></span>';
+    content += '<span class="threadNewMessages"><span class="value">0</span> new messages since load</span></div></li>';
     a.html(content);
     return a;
 }
 
+var lastDate = '';
 function Message(sender, content, date) {
-  var li = $('<li/>');  
-  var d = new Date(date);
-  var x = sender + ': ' + content + d;
+  var li = $('<li/>'),
+      d = new Date(date);
+  var x = '<span class="messageSender">' + sender + '</span>' + content + '<span class="messageDate">' + showDate(d) + '</span>';
   li.html(x);
   return li;
 }
@@ -231,6 +234,15 @@ function showNotification(id) {
     $notification[id].addClass('fa-comment');
     $h2[id].addClass('notifying');
     $notification[id].removeClass('fa-comment-o');
+}
+
+function showDate(date) {
+    var content = '';
+    content += date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear() + ' ';
+    content += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours());
+    content += ':';
+    content += (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
+    return content;
 }
 
 //helpful method to determine whether scrolling is possible or not

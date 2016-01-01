@@ -37,11 +37,12 @@ module.exports = function(io) {
     socket.on('joinThread', function(id) {
         if (socket.rooms.indexOf(id) === -1) {  
             socket.join(id);
+            var name;
             db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) {
-                socket.emit('joinThreadSuccess', id, row.name);  
+                name = row.name;
             });    
             db.all('SELECT content, sender, date FROM messages WHERE thread = ?', id, function(err, messagesRows) {
-                socket.emit('printMessages', messagesRows, id); //display messages to socket upon joining
+                socket.emit('printMessages', messagesRows, id, name); //display messages to socket upon joining
             });
         }
     });
@@ -55,7 +56,7 @@ module.exports = function(io) {
     socket.on('message', function(content, thread) {
         var d = new Date().toJSON();
         io.in(thread).emit('message', content, thread, socket.username, d);
-        io.emit('notifyInThreadList', thread, socket.username, d);
+        io.emit('notifyInThreadList', thread, d);
         db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d);
         db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);
     });
