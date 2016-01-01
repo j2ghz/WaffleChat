@@ -20,15 +20,14 @@ module.exports = function(io) {
     }
     
     //on connection list all threads
-    db.all('SELECT id, name, creator, lastActivity FROM threads', function(err, rows) {
+    db.all('SELECT * FROM threads', function(err, rows) {
         socket.emit('printThreads', rows);
     });  
     
     //on user creating a thread
     socket.on('createThread', function(name) {
-        var d = new Date().toJSON();
-        db.run("INSERT INTO threads ('name', 'creator', 'lastActivity') VALUES (?, ?, ?)", name, socket.username, d);
-        db.all('SELECT id, name, creator, lastActivity FROM threads', function(err, rows) {
+        db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username);
+        db.all('SELECT * FROM threads', function(err, rows) {
             io.emit('printThreads', rows); //update everyone's list upon creation of new one
         });
     });
@@ -56,9 +55,10 @@ module.exports = function(io) {
     socket.on('message', function(content, thread) {
         var d = new Date().toJSON();
         io.in(thread).emit('message', content, thread, socket.username, d);
-        io.emit('notifyInThreadList', thread, d);
+        io.emit('notifyInThreadList', thread, d, socket.username);
         db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d);
         db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);
+        db.run("UPDATE threads SET lastSender = ? WHERE id = ?", socket.username, thread);
     });
     
     //on disconnect of socket    

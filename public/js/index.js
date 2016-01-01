@@ -13,7 +13,7 @@ $('button#createThread').click(function() {
 socket.on('printThreads', function(threads) {
 	$threads.text('');
 	threads.forEach(function(thread) {
-		$threads.append(ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity));	
+		$threads.append(ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity, thread.lastSender));	
 	});    
 	$('a', $threads).click(function(e) { //when you click on thread, join it
         e.preventDefault();
@@ -61,8 +61,9 @@ socket.on('message', function(content, thread, sender, date) {
     }   
 });
 
-socket.on('notifyInThreadList', function(thread, date) {  
-    $('#threads a[href=' + thread+ '] .threadLastActivity .value').text(showDate(new Date(date)));
+socket.on('notifyInThreadList', function(thread, date, username) {  
+    $('#threads a[href=' + thread+ '] .threadLastActivity .value').eq(0).text(showDate(new Date(date)));
+    $('#threads a[href=' + thread+ '] .threadLastActivity .value').eq(1).text(username);
     var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
     $number.text(Number($number.text()) + 1);
 });
@@ -111,7 +112,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     return div;
 }
 
-function ThreadListItem(id, name, creator, lastActivity) {
+function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     var a = $('<a/>', {
         href: id
     }),
@@ -119,7 +120,11 @@ function ThreadListItem(id, name, creator, lastActivity) {
         content = '';
     content += '<li><div class="threadName">' + name + '</div><div class="threadFlex">';
     content += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
-    content += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(d) + '</span></span>';
+    if (lastSender === null) {
+        content += '<span class="threadLastActivity">Latest message: <span class="value"></span> - <span class="value"></span></span>';   
+    } else {
+        content += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(d) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
+    }
     content += '<span class="threadNewMessages"><span class="value">0</span> new messages since load</span></div></li>';
     a.html(content);
     return a;
@@ -237,6 +242,7 @@ function showNotification(id) {
 }
 
 function showDate(date) {
+    if (date.valueOf() === 0) {return ''}
     var content = '';
     content += date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear() + ' ';
     content += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours());
