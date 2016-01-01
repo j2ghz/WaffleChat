@@ -35,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //database
 var db = require('./database/conn');
-db.run("CREATE TABLE if not exists threads (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, creator TEXT, lastActivity TEXT)");
+db.run("CREATE TABLE if not exists threads (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, creator TEXT, lastActivity TEXT, lastSender TEXT)");
 db.run("CREATE TABLE if not exists messages (thread TEXT, sender TEXT, content TEXT, date TEXT)");
 db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, salt TEXT)');
 
