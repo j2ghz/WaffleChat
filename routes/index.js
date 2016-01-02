@@ -30,7 +30,11 @@ module.exports = function(passport) {
 	}));
   
     router.get('/login', function(req, res) {
-	   res.render('login');
+	    res.render('login');
+    });
+    
+    router.get('/bad-login' , function(req, res) {
+        res.send(401, 'Invalid username or passport');
     });
   
     router.get('/', isAuthenticated, function(req, res) {

@@ -132,9 +132,9 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     html += '<li><div class="threadName">' + name + '</div><div class="threadFlex">';
     html += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
     if (lastSender === null) {
-        html += '<span class="threadLastActivity">Latest message: <span class="value"></span> - <span class="value"></span></span>';   
+        html += '<span class="threadLastActivity">Last message: <span class="value"></span> - <span class="value"></span></span>';   
     } else {
-        html += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(_date) + ' ' + showTime(_date) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
+        html += '<span class="threadLastActivity">Last message: <span class="value">' + showDate(_date) + ' ' + showTime(_date) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
     }
     html += '<span class="threadNewMessages"><span class="value">0</span> new messages since load</span></div></li>';
     a.html(html);
