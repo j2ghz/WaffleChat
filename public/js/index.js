@@ -1,12 +1,16 @@
 /* global io from another file, provided by index.jade */
-var socket = io(),
-    $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
-    $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects
-    myUsername = $('#headerContainer h2').text(), myThreads = [], resizeTimer, notificationTimer, inputHeight, h2Height, lastSender = [], lastDate = [];
+var socket = io(), username, myThreads = [], lastSender = [], lastDate = [],
+    $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), 
+    $thread = [], $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects  
+    resizeTimer, notificationTimer, inputHeight, h2Height;
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
 	socket.emit('createThread', prompt('Select thread'));
+});
+
+socket.on('setUsername', function(name) {
+    username = name;
 });
 
 //print list of threads and allow user to join them
@@ -57,7 +61,7 @@ function submitMessage(id) { //on form submit
 //on receiving a message
 socket.on('message', function(thread, date, sender, content) {
     var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
-    if (myUsername !== sender) { //if someone else sends it, notify
+    if (username !== sender) { //if someone else sends it, notify
         notifyOfNewMessage(thread);   
     }   
 	$messages[thread].append(Message(thread, date, sender, content));
@@ -67,11 +71,11 @@ socket.on('message', function(thread, date, sender, content) {
 });
 
 //when not joined in a thread, increment 'new messages since load' and change Last message date and sender
-socket.on('notifyInThreadList', function(thread, date, username) {  
+socket.on('notifyInThreadList', function(thread, date, sender) {  
     var _date = new Date(date);
     var $lastActivity = $('#threads a[href=' + thread+ '] .threadLastActivity .value');
     $lastActivity.eq(0).text(showDate(_date) + ' ' + showTime(_date));
-    $lastActivity.eq(1).text(username);
+    $lastActivity.eq(1).text(sender);
     var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
     $number.text(Number($number.text()) + 1);
 });
