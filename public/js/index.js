@@ -2,7 +2,7 @@
 var socket = io(),
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
     $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects
-    myUsername = $('#mainContainer h2').text(), myThreads = [], resizeTimer, notificationTimer, inputHeight, h2Height, lastSender = [], lastDate = [];
+    myUsername = $('#headerContainer h2').text(), myThreads = [], resizeTimer, notificationTimer, inputHeight, h2Height, lastSender = [], lastDate = [];
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
