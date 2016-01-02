@@ -88,7 +88,7 @@ body{
     width:98%;
     bottom:3px;
     display:flex;
-    flex-direction:row;
+    flex-direction:row-reverse;
     text-align:left;
     max-height:500px;
     height:50%;
@@ -163,10 +163,10 @@ body{
         overflow:auto;
         line-height:150%;
         position:relative;
-        
-        li {
-            display:flex;
-        }
+    }
+    
+    .messageFlex{
+        display:flex;
     }
     
     .messageSender {
@@ -184,6 +184,12 @@ body{
     .messageTime{
         margin-left:5px;
         font-size:0.8em;
+    }
+    
+    .messageDate{
+        text-align:center;
+        font-size:0.8em;
+        padding:5px;
     }
     
     form.messageForm{
