@@ -9,7 +9,7 @@ $light-orange:#f93;
 
 body{
     background-image:url('../images/background.gif');
-    margin:2em;
+    margin:0px;
     overflow:hidden;
     font-family: Verdana, sans-serif;
     font-size:0.8em;
@@ -19,33 +19,42 @@ body{
 #mainContainer{
     display:flex;
     justify-content:space-between;
+    max-height:100vh;
 }
 
 #headerContainer{
-    align-self:flex-start;
+    box-sizing:border-box;
+    height:100vh;
     margin-right:25px;
+    flex-shrink:0;
 }
 
 #threadsContainer{
     flex-grow:1;
+    margin:2em;
 }
 
 #threadsContainer, #headerContainer{
-    background-color:#fff;
-    max-width:992px;
-    max-height:85vh;
+    background-color:#fff; 
     overflow:auto;
     box-shadow:0px 20px 100px -20px #000;
     padding:2em;
     
-    h1{
+    h1, h2{
         margin-top:0px;
         font-family:header;
-        font-size:6em;
         font-weight:normal;
         margin-bottom:15px;
-        text-align:center;
         color:$dark-orange;
+    }
+    
+    h1{
+        font-size:6em;
+        text-align:center;
+    }
+    
+    h2{
+        font-size:4em;
     }
 }
 
@@ -55,19 +64,24 @@ body{
     width:100%;
     
     a{       
-        color:#fff;
+        color:#666;
         text-decoration:none;
        
         li{    
-            background-color:$light-orange;
             padding:1em;
             margin-bottom:1em;
-            box-shadow: 0px 1px 3px #999;
-            transition: color 0.2s, box-shadow 0.2s, background-color 0.2s;
+            transition: color 0.2s, background-color 0.2s;
             line-height:2em;
             overflow:hidden;
             text-overflow:ellipsis; 
-            position:relative;        
+            position:relative;    
+            
+            .threadName {
+                transition: color 0.2s;
+                color:$dark-orange;
+                font-weight:bold;
+                font-size:1.2em;
+            }    
         
             .threadFlex {
                 display:flex;
@@ -84,12 +98,16 @@ body{
         }
   
         &:hover{
-            color:$dark-orange; 
+            color:white; 
             
-            li{ 
-                background-color:#fff;
-                box-shadow: 0 1px 15px #999;
+            .threadName{
+                color:white;
             }
+            
+            li{
+                background-color:$dark-orange;
+            }
+            
         }
     }
 }
