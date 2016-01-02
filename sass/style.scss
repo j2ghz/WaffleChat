@@ -16,17 +16,15 @@ body{
 
 //main container and list of threads
 #mainContainer{
-    margin-left:8px;
     background-color:#fff;
     max-width:992px;
-    min-height:100vh;
     margin-right:auto;
     margin-left:auto;
     box-shadow:0px 20px 100px -20px #000;
-    padding:10px;
+    padding:2em;
     
     h1{
-        margin-top:10px;
+        margin-top:0px;
         font-family:header;
         font-size:6em;
         font-weight:normal;
@@ -48,7 +46,7 @@ body{
         li{    
             background-color:$dark-orange;
             padding:1em;
-            margin-bottom:0.8em;
+            margin-bottom:1em;
             box-shadow: 0px 1px 3px #999;
             transition: color 0.2s, box-shadow 0.2s, background-color 0.2s;
             line-height:2em;
