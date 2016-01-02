@@ -38,11 +38,7 @@ socket.on('printMessages', function(messages, id, name) {
     cacheObjects(id, first); //put objects in $variables
     resizeMessages(); //resize elements by window height
     makeCollapsible(id); //collapsing behaviour
-    $close[id].click(function() { //close icon functionality
-        socket.emit('leaveThread', id);
-        myThreads.splice(myThreads.indexOf(id), 1);
-        removeObjects(id);
-    });
+    makeClosable(id);
     $messages[id].text('');
 	messages.forEach(function(message) {
 		$messages[id].append(Message(id, message.date, message.sender, message.content));	
@@ -62,9 +58,9 @@ socket.on('message', function(thread, date, sender, content) {
 });
 
 socket.on('notifyInThreadList', function(thread, date, username) {  
-    var d = new Date(date);
+    var _date = new Date(date);
     var $lastActivity = $('#threads a[href=' + thread+ '] .threadLastActivity .value');
-    $lastActivity.eq(0).text(showDate(d) + ' ' + showTime(d));
+    $lastActivity.eq(0).text(showDate(_date) + ' ' + showTime(_date));
     $lastActivity.eq(1).text(username);
     var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
     $number.text(Number($number.text()) + 1);
@@ -96,6 +92,7 @@ function removeObjects(thread) {
     $notification[thread] = undefined;
     $input[thread] = undefined;
     $close[thread] = undefined;
+    lastDate[thread] = undefined
 }
 
 function ThreadWindow(id, name) { //creating new element for joining
@@ -103,14 +100,14 @@ function ThreadWindow(id, name) { //creating new element for joining
         class: 'threadContainer',
         id: 'thread' + id
     }),
-    content = ''; //insert empty list of messages and form into it
-    content += '<h2><i class="fa fa-comment-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h2>';
-    content += '<div class="messagesContainer">';
-    content += '<ul class="messages"></ul>';
-    content += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
-    content += '<input autocomplete="off">';
-    content += '</form></div>';
-    div.html(content); //put content inside empty div
+    html = ''; //insert empty list of messages and form into it
+    html += '<h2><i class="fa fa-comment-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h2>';
+    html += '<div class="messagesContainer">';
+    html += '<ul class="messages"></ul>';
+    html += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
+    html += '<input autocomplete="off">';
+    html += '</form></div>';
+    div.html(html); //put content inside empty div
     return div;
 }
 
@@ -118,26 +115,34 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     var a = $('<a/>', {
         href: id
     }),
-    d = new Date(lastActivity),
-        content = '';
-    content += '<li><div class="threadName">' + name + '</div><div class="threadFlex">';
-    content += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
+        _date = new Date(lastActivity),
+        html = '';
+    html += '<li><div class="threadName">' + name + '</div><div class="threadFlex">';
+    html += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
     if (lastSender === null) {
-        content += '<span class="threadLastActivity">Latest message: <span class="value"></span> - <span class="value"></span></span>';   
+        html += '<span class="threadLastActivity">Latest message: <span class="value"></span> - <span class="value"></span></span>';   
     } else {
-        content += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(d) + ' ' + showTime(d) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
+        html += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(_date) + ' ' + showTime(_date) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
     }
-    content += '<span class="threadNewMessages"><span class="value">0</span> new messages since load</span></div></li>';
-    a.html(content);
+    html += '<span class="threadNewMessages"><span class="value">0</span> new messages since load</span></div></li>';
+    a.html(html);
     return a;
 }
 
 function Message(thread, date, sender, content) {
-  var li = $('<li/>'),
-      d = new Date(date);
-  var x = '<span class="messageSender">' + sender + '</span><span class="messageContent">' + content + '</span><span class="messageTime">' + showTime(d) + '</span>';
-  li.html(x);
-  return li;
+    var li = $('<li/>'),
+        _date = new Date(date),
+        d = showDate(_date),
+        t = showTime(_date),
+        html = '';
+    if (lastDate[thread] !== d) {
+        lastDate[thread] = d;
+        html += '<div class="messageDate">' + d + '</div>';   
+    }
+    html += '<div class="messageFlex">';
+    html += '<span class="messageSender">' + sender + '</span><span class="messageContent">' + content + '</span><span class="messageTime">' + t + '</span></div>';
+    li.html(html);
+    return li;
 }
 
 //sending a message
@@ -174,6 +179,14 @@ function scrollToLastMessage(id, animation) {
 function makeCollapsible(id) { 
     $h2[id].click(function() {   //when you click tab, toggle collapsing
         collapse(id);
+    });
+}
+
+function makeClosable(id) {
+    $close[id].click(function() { //close icon functionality
+        socket.emit('leaveThread', id);
+        myThreads.splice(myThreads.indexOf(id), 1);
+        removeObjects(id);
     });
 }
 
@@ -243,16 +256,15 @@ function showNotification(id) {
 }
 
 function showDate(date) {
-    if (date.valueOf() === 0) {return ''}
     return date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear() + ' ';
 }
 
 function showTime(date) {
-    var content = '';
-    content += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours());
-    content += ':';
-    content += (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
-    return content;
+    var html = '';
+    html += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours());
+    html += ':';
+    html += (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
+    return html;
 }
 
 //helpful method to determine whether scrolling is possible or not
