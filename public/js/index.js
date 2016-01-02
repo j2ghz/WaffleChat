@@ -2,7 +2,7 @@
 var socket = io(),
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), $thread = [], 
     $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects
-    myUsername = $('#mainContainer h2').text(), myThreads = [], resizeTimer, notificationTimer, inputHeight, h2Height; //TODO calculate input
+    myUsername = $('#mainContainer h2').text(), myThreads = [], resizeTimer, notificationTimer, inputHeight, h2Height, lastSender = [], lastDate = [];
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
@@ -45,25 +45,27 @@ socket.on('printMessages', function(messages, id, name) {
     });
     $messages[id].text('');
 	messages.forEach(function(message) {
-		$messages[id].append(Message(message.sender, message.content, message.date));	
+		$messages[id].append(Message(id, message.date, message.sender, message.content));	
 	});
 });
 
 //on receiving a message
-socket.on('message', function(content, thread, sender, date) {
+socket.on('message', function(thread, date, sender, content) {
     var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
     if (myUsername !== sender) { //if someone else sends it, notify
         notifyOfNewMessage(thread);   
     }   
-	$messages[thread].append(Message(sender, content, date));
+	$messages[thread].append(Message(thread, date, sender, content));
     if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
         scrollToLastMessage(thread, true);    
     }   
 });
 
 socket.on('notifyInThreadList', function(thread, date, username) {  
-    $('#threads a[href=' + thread+ '] .threadLastActivity .value').eq(0).text(showDate(new Date(date)));
-    $('#threads a[href=' + thread+ '] .threadLastActivity .value').eq(1).text(username);
+    var d = new Date(date);
+    var $lastActivity = $('#threads a[href=' + thread+ '] .threadLastActivity .value');
+    $lastActivity.eq(0).text(showDate(d) + ' ' + showTime(d));
+    $lastActivity.eq(1).text(username);
     var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
     $number.text(Number($number.text()) + 1);
 });
@@ -123,18 +125,17 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     if (lastSender === null) {
         content += '<span class="threadLastActivity">Latest message: <span class="value"></span> - <span class="value"></span></span>';   
     } else {
-        content += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(d) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
+        content += '<span class="threadLastActivity">Latest message: <span class="value">' + showDate(d) + ' ' + showTime(d) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
     }
     content += '<span class="threadNewMessages"><span class="value">0</span> new messages since load</span></div></li>';
     a.html(content);
     return a;
 }
 
-var lastDate = '';
-function Message(sender, content, date) {
+function Message(thread, date, sender, content) {
   var li = $('<li/>'),
       d = new Date(date);
-  var x = '<span class="messageSender">' + sender + '</span>' + content + '<span class="messageDate">' + showDate(d) + '</span>';
+  var x = '<span class="messageSender">' + sender + '</span><span class="messageContent">' + content + '</span><span class="messageTime">' + showTime(d) + '</span>';
   li.html(x);
   return li;
 }
@@ -142,7 +143,7 @@ function Message(sender, content, date) {
 //sending a message
 function submitMessage(id) { //on form submit
     if ($input[id].val() !== '') { //if not empty
-        socket.emit('message', $input[id].val(), id); //send value and thread id to server
+        socket.emit('message', id, $input[id].val()); //send value and thread id to server
         $input[id].val(''); //set input value back to nothing
     }
 }
@@ -243,8 +244,11 @@ function showNotification(id) {
 
 function showDate(date) {
     if (date.valueOf() === 0) {return ''}
+    return date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear() + ' ';
+}
+
+function showTime(date) {
     var content = '';
-    content += date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear() + ' ';
     content += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours());
     content += ':';
     content += (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());

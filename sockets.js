@@ -52,9 +52,9 @@ module.exports = function(io) {
     });
      
     //on message being sent
-    socket.on('message', function(content, thread) {
+    socket.on('message', function(thread, content) {
         var d = new Date().toJSON();
-        io.in(thread).emit('message', content, thread, socket.username, d);
+        io.in(thread).emit('message', thread, d, socket.username, content);
         io.emit('notifyInThreadList', thread, d, socket.username);
         db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d);
         db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);
