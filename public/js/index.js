@@ -140,7 +140,7 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     } else {
         html += '<span class="threadLastActivity">Last message: <span class="value">' + showDate(_date) + ' ' + showTime(_date) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
     }
-    html += '<span class="threadNewMessages"><span class="value">0</span> new messages since load</span></div></li>';
+    html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div></li>';
     a.html(html);
     return a;
 }
