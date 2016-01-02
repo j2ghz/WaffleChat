@@ -8,7 +8,8 @@ module.exports = function(io) {
             db.get('SELECT username FROM users WHERE id = ?', session.passport.user, function(err, row) {
                 socket.username = row.username;
                 socket.userid = session.passport.user;
-                console.log(socket.username + ' connected'); 
+                console.log(socket.username + ' connected');
+                socket.emit('setUsername', socket.username); 
             }); 
         } else {
             socket.username = null;
@@ -38,8 +39,8 @@ module.exports = function(io) {
     socket.on('joinThread', function(id) {
         if (socket.rooms.indexOf(id) === -1) {  
             socket.join(id);
-            var name;
-            db.serialize(function() {                
+            db.serialize(function() {   
+                var name;             
                 db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) {
                     name = row.name;
                 });    
