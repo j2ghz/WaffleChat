@@ -20,21 +20,23 @@ module.exports = function(passport) {
     router.post('/signupform', function(req, res, next) {
         var username = req.body.username; //get post parameters
         var password = req.body.password;
-  	    signup(username, password);
-        next(); //first sign up
+  	    signup(username, password, next);
     });
+    
     router.post('/signupform', passport.authenticate('local', { //then automatically log in as new user
         successRedirect: '/',
         failureRedirect: '/bad-login',
         failureFlash : true   
 	}));
-  
+    
     router.get('/login', function(req, res) {
 	    res.render('login');
     });
     
-    router.get('/bad-login' , function(req, res) {
-        res.send(401, 'Invalid username or passport');
+    router.get('/bad-login' , function(req, res, next) {
+        var err = new Error('Invalid username or password');
+        err.status = 401;
+        next(err);
     });
   
     router.get('/', isAuthenticated, function(req, res) {
