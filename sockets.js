@@ -26,9 +26,11 @@ module.exports = function(io) {
     
     //on user creating a thread
     socket.on('createThread', function(name) {
-        db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username);
-        db.all('SELECT * FROM threads', function(err, rows) {
-            io.emit('printThreads', rows); //update everyone's list upon creation of new one
+        db.serialize(function() {
+            db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username);
+            db.all('SELECT * FROM threads', function(err, rows) {
+                io.emit('printThreads', rows); //update everyone's list upon creation of new one
+            });        
         });
     });
     
@@ -37,11 +39,13 @@ module.exports = function(io) {
         if (socket.rooms.indexOf(id) === -1) {  
             socket.join(id);
             var name;
-            db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) {
-                name = row.name;
-            });    
-            db.all('SELECT content, sender, date FROM messages WHERE thread = ?', id, function(err, messagesRows) {
-                socket.emit('printMessages', messagesRows, id, name); //display messages to socket upon joining
+            db.serialize(function() {                
+                db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) {
+                    name = row.name;
+                });    
+                db.all('SELECT content, sender, date FROM messages WHERE thread = ?', id, function(err, messagesRows) {
+                    socket.emit('printMessages', messagesRows, id, name); //display messages to socket upon joining
+                });
             });
         }
     });
