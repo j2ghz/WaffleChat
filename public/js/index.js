@@ -45,6 +45,15 @@ socket.on('printMessages', function(messages, id, name) {
 	});
 });
 
+
+//sending a message
+function submitMessage(id) { //on form submit
+    if ($input[id].val() !== '') { //if not empty
+        socket.emit('message', id, $input[id].val()); //send value and thread id to server
+        $input[id].val(''); //set input value back to nothing
+    }
+}
+
 //on receiving a message
 socket.on('message', function(thread, date, sender, content) {
     var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
@@ -57,6 +66,7 @@ socket.on('message', function(thread, date, sender, content) {
     }   
 });
 
+//when not joined in a thread, increment 'new messages since load' and change Last message date and sender
 socket.on('notifyInThreadList', function(thread, date, username) {  
     var _date = new Date(date);
     var $lastActivity = $('#threads a[href=' + thread+ '] .threadLastActivity .value');
@@ -95,6 +105,7 @@ function removeObjects(thread) {
     lastDate[thread] = undefined
 }
 
+//creates thread window element after joining thread
 function ThreadWindow(id, name) { //creating new element for joining
     var div = $('<div/>', { //create empty div
         class: 'threadContainer',
@@ -111,6 +122,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     return div;
 }
 
+//creates thread list item element after connection or upon creation of new thread
 function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     var a = $('<a/>', {
         href: id
@@ -129,6 +141,7 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     return a;
 }
 
+//creates new message element upon receiving a new message or printMessages
 function Message(thread, date, sender, content) {
     var li = $('<li/>'),
         _date = new Date(date),
@@ -143,14 +156,6 @@ function Message(thread, date, sender, content) {
     html += '<span class="messageSender">' + sender + '</span><span class="messageContent">' + content + '</span><span class="messageTime">' + t + '</span></div>';
     li.html(html);
     return li;
-}
-
-//sending a message
-function submitMessage(id) { //on form submit
-    if ($input[id].val() !== '') { //if not empty
-        socket.emit('message', id, $input[id].val()); //send value and thread id to server
-        $input[id].val(''); //set input value back to nothing
-    }
 }
 
 //gets called whenever window is resized and upon creation of new thread window
@@ -182,6 +187,7 @@ function makeCollapsible(id) {
     });
 }
 
+//make thread closable
 function makeClosable(id) {
     $close[id].click(function() { //close icon functionality
         socket.emit('leaveThread', id);
@@ -255,13 +261,14 @@ function showNotification(id) {
     $notification[id].removeClass('fa-comment-o');
 }
 
+//parses date object into string
 function showDate(date) {
     return date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear() + ' ';
 }
 
 function showTime(date) {
     var html = '';
-    html += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours());
+    html += (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()); //returns 03:04 instead of 3:4
     html += ':';
     html += (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes());
     return html;
