@@ -1,8 +1,8 @@
 /* global io from another file, provided by index.jade */
 var socket = io(), username, myThreads = [], lastSender = [], lastDate = [],
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), 
-    $thread = [], $messagesContainer = [], $messages = [], $h2 = [], $notification = [], $input = [], $close = [], //caching jquery objects  
-    resizeTimer, notificationTimer, inputHeight, h2Height;
+    $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $input = [], $close = [], //caching jquery objects  
+    resizeTimer, notificationTimer, inputHeight, h3Height;
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
@@ -86,13 +86,13 @@ function cacheObjects(thread, first) {
     $thread[thread] = $('#thread' + thread);
     $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
     $messages[thread] = $('.messages', $thread[thread]);
-    $h2[thread] = $('h2', $thread[thread]);
-    $notification[thread] = $('i.notification', $h2[thread]);
+    $h3[thread] = $('h3', $thread[thread]);
+    $notification[thread] = $('i.notification', $h3[thread]);
     $input[thread] = $('input', $thread[thread]);
-    $close[thread] = $('i.close', $h2[thread]);
+    $close[thread] = $('i.close', $h3[thread]);
     if (first) {
         inputHeight = $input[thread].outerHeight();
-        h2Height = $h2[thread].outerHeight();
+        h3Height = $h3[thread].outerHeight();
     }
 }
 
@@ -102,7 +102,7 @@ function removeObjects(thread) {
     $thread[thread] = undefined;
     $messagesContainer[thread] = undefined;
     $messages[thread] = undefined;
-    $h2[thread] = undefined;
+    $h3[thread] = undefined;
     $notification[thread] = undefined;
     $input[thread] = undefined;
     $close[thread] = undefined;
@@ -116,7 +116,7 @@ function ThreadWindow(id, name) { //creating new element for joining
         id: 'thread' + id
     }),
     html = ''; //insert empty list of messages and form into it
-    html += '<h2><i class="fa fa-comment-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h2>';
+    html += '<h3><i class="fa fa-comment-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h3>';
     html += '<div class="messagesContainer">';
     html += '<ul class="messages"></ul>';
     html += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
@@ -165,8 +165,8 @@ function Message(thread, date, sender, content) {
 //gets called whenever window is resized and upon creation of new thread window
 function resizeMessages() { 
     var chatHeight = $chatContainer.height();
-    $('.messages').height(chatHeight - h2Height - inputHeight); //set height of all ul.messages dynamically by container height (which is by 50% of window)
-    $('.threadContainer.collapsed').css('top', chatHeight - h2Height); //move collapsed tab when resizing
+    $('.messages').height(chatHeight - h3Height - inputHeight); //set height of all ul.messages dynamically by container height (which is by 50% of window)
+    $('.threadContainer.collapsed').css('top', chatHeight - h3Height); //move collapsed tab when resizing
 }
 
 //resize ul.messages on window resize
@@ -186,7 +186,7 @@ function scrollToLastMessage(id, animation) {
 
 //make thread collapsible
 function makeCollapsible(id) { 
-    $h2[id].click(function() {   //when you click tab, toggle collapsing
+    $h3[id].click(function() {   //when you click tab, toggle collapsing
         collapse(id);
     });
 }
@@ -255,13 +255,13 @@ function isAtBottom(messages) {
 //hides or shows notification in given thread
 function hideNotification(id) {
     $notification[id].addClass('fa-comment-o');
-    $h2[id].removeClass('notifying');
+    $h3[id].removeClass('notifying');
     $notification[id].removeClass('fa-comment');
 }
 
 function showNotification(id) {
     $notification[id].addClass('fa-comment');
-    $h2[id].addClass('notifying');
+    $h3[id].addClass('notifying');
     $notification[id].removeClass('fa-comment-o');
 }
 
