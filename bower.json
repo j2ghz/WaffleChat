@@ -1,0 +1,25 @@
+{
+  "name": "WaffleThread",
+  "description": "",
+  "main": "",
+  "authors": [
+    "J2ghz <j2.00ghz@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/j2ghz/WaffleChat",
+  "moduleType": [
+    "node"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "sweetalert": "~1.1.3"
+  }
+}
