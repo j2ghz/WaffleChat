@@ -18,18 +18,13 @@ socket.on('printThreads', function(threads) {
 	$threads.text('');
 	threads.forEach(function(thread) {
 		$threads.prepend(ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity, thread.lastSender));	
+        makeJoinable(thread.id);
 	});    
-	$('a', $threads).click(function(e) { //when you click on thread, join it
-        e.preventDefault();
-        var id = $(this).attr('href')
-        if (myThreads.indexOf(id) === -1) { //if not already joined, join
-            socket.emit('joinThread', id); 
-        } else {
-             if ($thread[id].hasClass('collapsed') === true) { //else uncollapse already joined thread
-                 collapse(id);
-             }
-        }
-	});
+});
+
+socket.on('printThread', function(id, name, creator) {
+    $threads.prepend(ThreadListItem(id, name, creator, null, null));
+    makeJoinable(id);
 });
 
 //after joining and creation of element, print all messages
@@ -198,6 +193,19 @@ function makeClosable(id) {
         myThreads.splice(myThreads.indexOf(id), 1);
         removeObjects(id);
     });
+}
+
+function makeJoinable(id) {
+    $('a[href=' + id + ']', $threads).click(function(e) { //when you click on thread, join it
+        e.preventDefault();
+        if (myThreads.indexOf(id) === -1) { //if not already joined, join
+            socket.emit('joinThread', id); 
+        } else {
+             if ($thread[id].hasClass('collapsed') === true) { //else uncollapse already joined thread
+                 collapse(id);
+             }
+        }
+	});
 }
 
 //collapse given thread
