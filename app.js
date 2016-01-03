@@ -73,6 +73,7 @@ require('./sockets')(io); //use logic from sockets.js file and provide io object
 var routes = require('./routes/index')(passport);
 app.use('/', routes);
 
+//error handlers
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
@@ -80,12 +81,14 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-//error handlers
+//redirect on bad login credentials
 app.use(function(err, req, res, next) {
-    if (err.status === 401) {
+    if (err.status === 401 || err.status === 403) {
         res.render('login', {
             message: err.message
         });
+    } else {
+        next(err);
     }
 });
 
