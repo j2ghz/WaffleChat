@@ -4,6 +4,7 @@ block content
   body
     div(id="headerContainer")
         h1 WaffleThread
+        h2= message
         form(action='/loginform', method='POST')
             input(type='text', name='username', placeholder='Username',required, autofocus)
             input(type='password', name='password', placeholder='Password', required)
