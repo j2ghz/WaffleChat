@@ -262,6 +262,7 @@ body{
 @media only screen and (max-width:992px), only screen and (orientation:portrait){
     #mainContainer{
         flex-direction:column;
+        max-height:none;
     }
     
     #headerContainer{
@@ -271,9 +272,5 @@ body{
     
     body{
         overflow:auto;
-    }
-    
-    #mainContainer{
-        max-height:none;
     }
 }
