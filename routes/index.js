@@ -14,7 +14,6 @@ module.exports = function(passport) {
     router.post('/loginform', passport.authenticate('local', {
         successRedirect: '/',
         failureRedirect: '/bad-login',
-        failureFlash : true   
     }));
   
     router.post('/signupform', function(req, res, next) {
@@ -26,7 +25,6 @@ module.exports = function(passport) {
     router.post('/signupform', passport.authenticate('local', { //then automatically log in as new user
         successRedirect: '/',
         failureRedirect: '/bad-login',
-        failureFlash : true   
 	}));
     
     router.get('/login', function(req, res) {

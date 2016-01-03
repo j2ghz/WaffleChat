@@ -61,8 +61,6 @@ app.use(passport.session());
 var initPassport = require('./passport/init');
 initPassport(passport);
 
-//add flash messages
-
 //socket.io
 var io = require('socket.io')();
 io.use(function(socket, next) {
@@ -83,6 +81,13 @@ app.use(function(req, res, next) {
 });
 
 //error handlers
+app.use(function(err, req, res, next) {
+    if (err.status === 401) {
+        res.render('login', {
+            message: err.message
+        });
+    }
+});
 
 //development error handler
 //will print stacktrace

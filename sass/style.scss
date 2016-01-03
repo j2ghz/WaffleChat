@@ -49,12 +49,12 @@ body{
     }
     
     h1{
-        font-size:4em;
+        font-size:3em;
         text-align:center;
     }
     
     h2{
-        font-size:3em;
+        font-size:2em;
     }
 }
 
@@ -84,24 +84,21 @@ body{
             }    
         
             .threadFlex {
-                display:flex;
-                
-                span{
-                    flex-basis:0px;
-                }
+                display:flex;              
             }
             
             .threadCreator {
-                flex-grow:0.5;
+                flex-basis:150px;
+                flex-grow:1;
             }
             
             .threadLastActivity {
                 flex-grow:1;
-                text-align:center;
+                text-align:left;
             }
             
             .threadNewMessages {
-                flex-grow:0.5;
+                flex-grow:0;
                 text-align:right;
             }
         }
