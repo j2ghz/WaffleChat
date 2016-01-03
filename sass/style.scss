@@ -1,4 +1,4 @@
-$darker-orange:#d60;
+$darker-orange:#d61;
 $dark-orange:#f82;
 $light-orange:#f93;
 
@@ -49,12 +49,12 @@ body{
     }
     
     h1{
-        font-size:6em;
+        font-size:4em;
         text-align:center;
     }
     
     h2{
-        font-size:4em;
+        font-size:3em;
     }
 }
 
@@ -87,12 +87,21 @@ body{
                 display:flex;
                 
                 span{
-                    flex-grow:1;
                     flex-basis:0px;
                 }
             }
             
+            .threadCreator {
+                flex-grow:0.5;
+            }
+            
+            .threadLastActivity {
+                flex-grow:1;
+                text-align:center;
+            }
+            
             .threadNewMessages {
+                flex-grow:0.5;
                 text-align:right;
             }
         }
@@ -105,7 +114,7 @@ body{
             }
             
             li{
-                background-color:$dark-orange;
+                background-color:$light-orange;
             }
             
         }
@@ -247,5 +256,24 @@ body{
                  background-color:$darker-orange;
             }
         }
+    }
+}
+
+@media only screen and (max-width:992px), only screen and (orientation:portrait){
+    #mainContainer{
+        flex-direction:column;
+    }
+    
+    #headerContainer{
+        height:auto;
+        margin-right:0px;
+    }
+    
+    body{
+        overflow:auto;
+    }
+    
+    #mainContainer{
+        max-height:none;
     }
 }
