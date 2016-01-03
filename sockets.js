@@ -36,11 +36,8 @@ module.exports = function(io) {
         if (name === '') {
             //TODO send error cant create thread with empty name
         } else {
-            db.serialize(function() {
-                db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username);
-                db.all('SELECT * FROM threads', function(err, rows) {
-                    io.emit('printThreads', rows); //update everyone's list upon creation of new one
-                });        
+            db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username, function() {
+                io.emit('printThread', this.lastID, name, socket.username); //update everyone's list upon creation of new one    
             });
         }
     });
