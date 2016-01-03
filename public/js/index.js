@@ -17,7 +17,7 @@ socket.on('setUsername', function(name) {
 socket.on('printThreads', function(threads) {
 	$threads.text('');
 	threads.forEach(function(thread) {
-		$threads.append(ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity, thread.lastSender));	
+		$threads.prepend(ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity, thread.lastSender));	
 	});    
 	$('a', $threads).click(function(e) { //when you click on thread, join it
         e.preventDefault();
