@@ -34,7 +34,8 @@ module.exports = function(io) {
     socket.on('createThread', function(name) {
         name = validator.escape(validator.trim(name));
         if (name === '') {
-            //TODO send error cant create thread with empty name
+            socket.emit('showError', '', 'You cannot create a thread with a blank name.');
+            return false;
         } else {
             db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username, function() {
                 io.emit('printThread', this.lastID, name, socket.username); //update everyone's list upon creation of new one    
@@ -44,23 +45,22 @@ module.exports = function(io) {
     
     //on user joining thread
     socket.on('joinThread', function(id) {
+        var name = null;
         id = validator.toInt(id);
         if (socket.rooms.indexOf(id) === -1) {  
-            socket.join(id);
-            db.serialize(function() {   
-                var name = null;             
-                db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) {
-                    if(!row){
-                        return false; //TODO send error: no room with such id exists
-                    } else {
-                        name = row.name;               
-                    }
-                });    
-                db.all('SELECT content, sender, date FROM messages WHERE thread = ?', id, function(err, messagesRows) {
-                    socket.emit('printMessages', messagesRows, id, name); //display messages to socket upon joining
-                });
+            db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) { //check if thread exists and if it does, find its name
+                if(!row){
+                    socket.emit('showError', '', 'This thread no longer exists.');
+                    return false;
+                } else {
+                    socket.join(id);   
+                    name = row.name;    
+                    db.all('SELECT content, sender, date FROM messages WHERE thread = ?', id, function(err, messagesRows) {
+                        socket.emit('printMessages', messagesRows, id, name); //display messages to socket upon joining
+                    });           
+                } 
             });
-        }
+        }     
     });
     
     //on user leaving thread
@@ -75,7 +75,8 @@ module.exports = function(io) {
         content = validator.escape(validator.trim(content));
         db.get("SELECT * FROM threads WHERE id = ?", thread, function(err, row) {
             if (!row) {
-                return false; //TODO no such thread exists
+                socket.emit('showError', '', 'This thread no longer exists.');
+                return false;
             } else {
                 db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d);
                 db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);

@@ -1,3 +1,4 @@
+/* global swal */
 /* global io from another file, provided by index.jade */
 var socket = io(), username, myThreads = [], lastSender = [], lastDate = [],
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), 
@@ -6,7 +7,26 @@ var socket = io(), username, myThreads = [], lastSender = [], lastDate = [],
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
-	socket.emit('createThread', prompt('Select thread'));
+    swal({
+        title:'Enter a name',
+        text:'You can enter any characters you want.',
+        type:'input',
+        showCancelButton:true,
+        closeOnConfirm:false     
+    }, function(inputValue) {
+        if (inputValue === false) return false;
+        if (inputValue === '') {
+            swal.showInputError("You need to write something!");
+            return false;
+        }
+        swal({
+            title:'Success!',
+            text:'You have created a room called ' + inputValue + '.',
+            type:'success'
+        })
+        socket.emit('createThread', inputValue); 
+    });
+	
 });
 
 socket.on('setUsername', function(name) {
@@ -73,6 +93,14 @@ socket.on('notifyInThreadList', function(thread, date, sender) {
     $lastActivity.eq(1).text(sender);
     var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
     $number.text(Number($number.text()) + 1);
+});
+
+socket.on('showError', function(header, message) {
+    swal({
+        type:'error',
+        title: header,
+        text: message,
+    })
 });
 
 //styling and display behaviour of app
