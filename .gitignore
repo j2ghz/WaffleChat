@@ -30,3 +30,4 @@ database/sqlite.db
 sessions
 public/stylesheets
 typings
+bower_components
