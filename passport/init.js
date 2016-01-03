@@ -1,6 +1,7 @@
 var db = require('../database/conn');
 var LocalStrategy  = require('passport-local').Strategy;
 var hashPassword = require('./hash');
+var validator = require('validator');
 module.exports = function(passport) {
     passport.serializeUser(function(user, done) {
         return done(null, user.id);
@@ -12,6 +13,7 @@ module.exports = function(passport) {
         });
     });
     passport.use('local', new LocalStrategy(function(username, password, done) {
+        username = validator.escape(username);
         db.get('SELECT salt FROM users WHERE username = ?', username, function(err, row) {
             if (!row) return done(null, false);
             var hash = hashPassword(password, row.salt);
