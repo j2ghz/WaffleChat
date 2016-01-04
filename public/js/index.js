@@ -182,6 +182,7 @@ function Message(thread, date, sender, content) {
     html += '<div class="messageFlex">';
     html += '<span class="messageSender">' + sender + '</span><span class="messageContent">' + content + '</span><span class="messageTime">' + t + '</span></div>';
     li.html(html);
+    li.linkify();
     return li;
 }
 

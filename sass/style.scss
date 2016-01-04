@@ -213,6 +213,7 @@ h2{
         margin-right:5px;
         font-weight:bold;
         color:$darker-orange;
+        flex-shrink:0;
     }
     
     .messageContent{
