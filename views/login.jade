@@ -2,8 +2,9 @@ extends layout
 
 block content
   body
-    div(class="genericContainer")
+    div(class="genericHeaderContainer")
         h1 WaffleThread
+    div(class="genericContainer")
         h2= message
         form(action='/loginform', method='POST')
             input(type='text', name='username', placeholder='Username',required, autofocus)
