@@ -44,7 +44,6 @@ socket.on('printThreads', function(threads) {
 
 socket.on('printThread', function(id, name, creator) {
     $threads.prepend(ThreadListItem(id, name, creator, null, null));
-    makeJoinable(id);
 });
 
 //after joining and creation of element, print all messages
@@ -165,6 +164,7 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     }
     html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div></li>';
     a.html(html);
+    makeJoinable(a, id);
     return a;
 }
 
@@ -224,8 +224,8 @@ function makeClosable(id) {
     });
 }
 
-function makeJoinable(id) {
-    $('a[href=' + id + ']', $threads).click(function(e) { //when you click on thread, join it
+function makeJoinable(a, id) {
+    $(a).click(function(e) { //when you click on thread, join it
         e.preventDefault();
         if (myThreads.indexOf(id) === -1) { //if not already joined, join
             socket.emit('joinThread', id); 
