@@ -253,8 +253,7 @@ h2{
     }
     
     form.messageForm{
-        padding-left:3px;
-        padding-right:3px;
+        padding:1px 3px 0px 3px;
                
         textarea{
             height:60px;
@@ -263,6 +262,7 @@ h2{
             border-style:solid;
             width:100%;
             box-sizing:border-box;
+            resize:none;
         }
     }
     
