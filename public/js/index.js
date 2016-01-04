@@ -180,7 +180,7 @@ function Message(thread, date, sender, content) {
         html += '<div class="messageDate">' + d + '</div>';   
     }
     html += '<div class="messageFlex">';
-    html += '<span class="messageSender">' + sender + '</span><span class="messageContent">' + content + '</span><span class="messageTime">' + t + '</span></div>';
+    html += '<span class="messageContent"><span class="messageSender">' + sender + '</span>' + content + '</span><span class="messageTime">' + t + '</span></div>';
     li.html(html);
     li.linkify();
     return li;

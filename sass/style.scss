@@ -91,15 +91,20 @@ h2{
                 display:flex;      
                 span{
                     flex-basis:0px;
-                    flex-grow:1;
                 }        
+            }
+            
+            .threadCreator{
+                flex-grow:0.6;
             }
             
             .threadLastActivity {
                 text-align:left;
+                flex-grow:1;
             }
             
             .threadNewMessages {
+                flex-grow:0.6;
                 text-align:right;
             }
         }
@@ -207,13 +212,15 @@ h2{
     
     .messageFlex{
         display:flex;
+        max-width:100%;
+        margin-bottom:5px;
     }
     
     .messageSender {
         margin-right:5px;
         font-weight:bold;
         color:$darker-orange;
-        flex-shrink:0;
+        white-space:nowrap;
     }
     
     .messageContent{
@@ -262,13 +269,21 @@ h2{
 
 @media only screen and (max-width:1280px), only screen and (orientation:portrait){
     #mainContainer{
-        flex-direction:column;
         max-height:none;
+        height:auto;
     }
     
     #headerContainer{
+        position:fixed;
+        top:0px;
         height:auto;
         margin-right:0px;
+        width:100%;
+        z-index:1;
+    }
+    
+    #threadsContainer{
+        margin-top:200px;
     }
     
     body{
