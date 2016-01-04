@@ -56,7 +56,7 @@ module.exports = function(io) {
                     socket.join(id);   
                     name = row.name;    
                     db.all('SELECT content, sender, date FROM messages WHERE thread = ?', id, function(err, messagesRows) {
-                        socket.emit('printMessages', messagesRows, id, name); //display messages to socket upon joining
+                        socket.emit('joinThread', messagesRows, id, name); //display messages to socket upon joining
                     });           
                 } 
             });

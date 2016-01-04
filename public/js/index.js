@@ -2,8 +2,8 @@
 /* global io from another file, provided by index.jade */
 var socket = io(), username, myThreads = [], lastSender = [], lastDate = [],
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), 
-    $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $input = [], $close = [], //caching jquery objects  
-    resizeTimer, notificationTimer, inputHeight, h3Height;
+    $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $textarea = [], $close = [], //caching jquery objects  
+    resizeTimer, notificationTimer, textareaHeight, h3Height;
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
@@ -47,7 +47,7 @@ socket.on('printThread', function(id, name, creator) {
 });
 
 //after joining and creation of element, print all messages
-socket.on('printMessages', function(messages, id, name) {
+socket.on('joinThread', function(messages, id, name) {
     $chatContainer.append(ThreadWindow(id, name)); 
     if (myThreads.length === 0) { //if this is the first window to be created, set boolean to true
         var first = true;
@@ -61,14 +61,15 @@ socket.on('printMessages', function(messages, id, name) {
 	messages.forEach(function(message) {
 		$messages[id].append(Message(id, message.date, message.sender, message.content));	
 	});
+    makeTextareaSubmittable(id);
 });
 
 
 //sending a message
 function submitMessage(id) { //on form submit
-    if ($input[id].val() !== '') { //if not empty
-        socket.emit('message', id, $input[id].val()); //send value and thread id to server
-        $input[id].val(''); //set input value back to nothing
+    if ($textarea[id].val() !== '') { //if not empty
+        socket.emit('message', id, $textarea[id].val()); //send value and thread id to server
+        $textarea[id].val(''); //set input value back to nothing
     }
 }
 
@@ -110,10 +111,10 @@ function cacheObjects(thread, first) {
     $messages[thread] = $('.messages', $thread[thread]);
     $h3[thread] = $('h3', $thread[thread]);
     $notification[thread] = $('i.notification', $h3[thread]);
-    $input[thread] = $('input', $thread[thread]);
+    $textarea[thread] = $('textarea', $thread[thread]);
     $close[thread] = $('i.close', $h3[thread]);
     if (first) {
-        inputHeight = $input[thread].outerHeight();
+        textareaHeight = $textarea[thread].outerHeight();
         h3Height = $h3[thread].outerHeight();
     }
 }
@@ -126,7 +127,7 @@ function removeObjects(thread) {
     $messages[thread] = undefined;
     $h3[thread] = undefined;
     $notification[thread] = undefined;
-    $input[thread] = undefined;
+    $textarea[thread] = undefined;
     $close[thread] = undefined;
     lastDate[thread] = undefined
 }
@@ -142,7 +143,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     html += '<div class="messagesContainer">';
     html += '<ul class="messages"></ul>';
     html += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
-    html += '<input autocomplete="off">';
+    html += '<textarea autocomplete="off"></textarea>';
     html += '</form></div>';
     div.html(html); //put content inside empty div
     return div;
@@ -168,7 +169,7 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     return a;
 }
 
-//creates new message element upon receiving a new message or printMessages
+//creates new message element upon socket joining thread
 function Message(thread, date, sender, content) {
     var li = $('<li/>'),
         _date = new Date(date),
@@ -179,6 +180,7 @@ function Message(thread, date, sender, content) {
         lastDate[thread] = d;
         html += '<div class="messageDate">' + d + '</div>';   
     }
+    content = content.replace(/(?:\r\n|\r|\n)/g, '<br />'); //replace \n with <br />
     html += '<div class="messageFlex">';
     html += '<span class="messageContent"><span class="messageSender">' + sender + '</span>' + content + '</span><span class="messageTime">' + t + '</span></div>';
     li.html(html);
@@ -189,7 +191,7 @@ function Message(thread, date, sender, content) {
 //gets called whenever window is resized and upon creation of new thread window
 function resizeMessages() { 
     var chatHeight = $chatContainer.height();
-    $('.messages').height(chatHeight - h3Height - inputHeight); //set height of all ul.messages dynamically by container height (which is by 50% of window)
+    $('.messages').height(chatHeight - h3Height - textareaHeight); //set height of all ul.messages dynamically by container height (which is by 50% of window)
     $('.threadContainer.collapsed').css('top', chatHeight - h3Height); //move collapsed tab when resizing
 }
 
@@ -251,6 +253,21 @@ function collapse(id){
         scrollToLastMessage(id, true); //scroll down and remove notification
         hideNotification(id);
     }  
+}
+
+function makeTextareaSubmittable(id) {
+    $textarea[id].keydown(function(e) {
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            if (e.shiftKey === false) {
+                $(this.form).submit()
+                return false;   
+            } else {
+                var s = $(this).val();
+                $(this).val(s + "\n");
+            }       
+        }
+    });
 }
 
 //notify of new message

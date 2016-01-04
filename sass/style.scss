@@ -253,14 +253,16 @@ h2{
     }
     
     form.messageForm{
+        padding-left:3px;
+        padding-right:3px;
                
-        input{
-            height:21px;
+        textarea{
+            height:60px;
             padding:1px 0;
-            border-width:2px;
+            border-width:1px;
+            border-style:solid;
             width:100%;
-            position:relative;
-            right:1px;
+            box-sizing:border-box;
         }
     }
     
