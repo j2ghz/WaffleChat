@@ -90,7 +90,7 @@ socket.on('notifyInThreadList', function(thread, date, sender) {
     var _date = new Date(date);
     var $lastActivity = $('#threads a[href=' + thread+ '] .threadLastActivity .value');
     $lastActivity.eq(0).text(showDate(_date) + ' ' + showTime(_date));
-    $lastActivity.eq(1).text(sender);
+    $lastActivity.eq(1).html(sender);
     var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
     $number.text(Number($number.text()) + 1);
 });

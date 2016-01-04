@@ -73,18 +73,22 @@ module.exports = function(io) {
         var d = new Date().toJSON();
         thread = validator.toInt(thread);
         content = validator.escape(validator.trim(content));
-        db.get("SELECT * FROM threads WHERE id = ?", thread, function(err, row) {
-            if (!row) {
-                socket.emit('showError', '', 'This thread no longer exists.');
-                return false;
-            } else {
-                db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d);
-                db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);
-                db.run("UPDATE threads SET lastSender = ? WHERE id = ?", socket.username, thread);
-                io.in(thread).emit('message', thread, d, socket.username, content);
-                io.emit('notifyInThreadList', thread, d, socket.username);
-            }
-        });
+        if (content === '') {
+            socket.emit('showError', '', 'You cannot send an empty message.');
+        } else {
+            db.get("SELECT * FROM threads WHERE id = ?", thread, function(err, row) {
+                if (!row) {
+                    socket.emit('showError', '', 'This thread no longer exists.');
+                    return false;
+                } else {
+                    db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d);
+                    db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);
+                    db.run("UPDATE threads SET lastSender = ? WHERE id = ?", socket.username, thread);
+                    io.in(thread).emit('message', thread, d, socket.username, content);
+                    io.emit('notifyInThreadList', thread, d, socket.username);
+                }
+            });
+        }
     });
     
     //on disconnect of socket    
