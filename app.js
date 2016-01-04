@@ -65,7 +65,7 @@ initPassport(passport);
 //socket.io
 var io = require('socket.io')();
 io.use(function(socket, next) {
-    sessionMiddleware(socket.request, {}, next);
+    sessionMiddleware(socket.request, socket.request.res, next);
 });
 app.io = io; //provide io object to /bin/www via module.export of app to attach to server
 require('./sockets')(io); //use logic from sockets.js file and provide io object from this file
