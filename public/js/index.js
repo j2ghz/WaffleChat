@@ -1,9 +1,7 @@
 /* global swal */
 /* global io from another file, provided by index.jade */
-var socket = io(), username, myThreads = [], lastSender = [], lastDate = [],
-    $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'), 
-    $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $textarea = [], $close = [], //caching jquery objects  
-    resizeTimer, notificationTimer, textareaHeight, h3Height;
+var socket = io(), myUsername, myThreads = [], lastDate = [],
+    $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'); //caching jquery objects  
 
 //Create Thread button functionality
 $('button#createThread').click(function() {
@@ -30,7 +28,7 @@ $('button#createThread').click(function() {
 });
 
 socket.on('setUsername', function(name) {
-    username = name;
+    myUsername = name;
 });
 
 //print list of threads and allow user to join them
@@ -53,7 +51,7 @@ socket.on('joinThread', function(messages, id, name) {
         var first = true;
     }
     myThreads.push(id);
-    cacheObjects(id, first); //put objects in $variables
+    cacheElements(id, first); //put objects in $variables
     resizeMessages(); //resize elements by window height
     makeCollapsible(id); //collapsing behaviour
     makeClosable(id);
@@ -76,7 +74,7 @@ function submitMessage(id) { //on form submit
 //on receiving a message
 socket.on('message', function(thread, date, sender, content) {
     var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
-    if (username !== sender) { //if someone else sends it, notify
+    if (myUsername !== sender) { //if someone else sends it, notify
         notifyOfNewMessage(thread);   
     }   
 	$messages[thread].append(Message(thread, date, sender, content));
@@ -105,7 +103,10 @@ socket.on('showError', function(header, message) {
 
 //styling and display behaviour of app
 //caching objects into $variable[threadid] reference, if first is provided, cache height of elements for resizing as well
-function cacheObjects(thread, first) {
+var $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $textarea = [], $close = [],
+    textareaHeight, h3Height;
+    
+function cacheElements(thread, first) {
     $thread[thread] = $('#thread' + thread);
     $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
     $messages[thread] = $('.messages', $thread[thread]);
@@ -113,6 +114,7 @@ function cacheObjects(thread, first) {
     $notification[thread] = $('i.notification', $h3[thread]);
     $textarea[thread] = $('textarea', $thread[thread]);
     $close[thread] = $('i.close', $h3[thread]);
+    
     if (first) {
         textareaHeight = $textarea[thread].outerHeight();
         h3Height = $h3[thread].outerHeight();
@@ -120,7 +122,7 @@ function cacheObjects(thread, first) {
 }
 
 //removing object references and removing thread element on leaving
-function removeObjects(thread) {
+function removeElements(thread) {
     $thread[thread].remove();
     $thread[thread] = undefined;
     $messagesContainer[thread] = undefined;
@@ -196,6 +198,7 @@ function resizeMessages() {
 }
 
 //resize ul.messages on window resize
+var resizeTimer;
 $(window).resize(function() { 
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(resizeMessages, 250); //resize throttling
@@ -222,7 +225,7 @@ function makeClosable(id) {
     $close[id].click(function() { //close icon functionality
         socket.emit('leaveThread', id);
         myThreads.splice(myThreads.indexOf(id), 1);
-        removeObjects(id);
+        removeElements(id);
     });
 }
 
@@ -271,6 +274,7 @@ function makeTextareaSubmittable(id) {
 }
 
 //notify of new message
+var notificationTimer;
 function notifyOfNewMessage(id) {
     showNotification(id); 
     //removing notifications 
