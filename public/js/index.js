@@ -31,12 +31,13 @@ socket.on('printThreads', function(threads) {
 	$threads.text('');
 	threads.forEach(function(thread) {
 		$threads.prepend(ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity, thread.lastSender));	
-        makeJoinable(thread.id);
+        cacheThreadListElements(thread.id);
 	});    
 });
 
 socket.on('printThread', function(id, name, creator) {
     $threads.prepend(ThreadListItem(id, name, creator, null, null));
+    cacheThreadListElements(id);
 });
 
 //after joining and creation of element, print all messages
@@ -46,7 +47,7 @@ socket.on('joinThread', function(messages, id, name) {
         var first = true;
     }
     myThreads.push(id);
-    cacheElements(id, first); //put objects in $variables
+    cacheThreadElements(id, first); //put objects in $variables
     resizeMessages(); //resize elements by window height
     makeCollapsible(id); //collapsing behaviour
     makeClosable(id);
@@ -82,34 +83,37 @@ socket.on('message', function(id, thread, date, sender, content) {
 //when not joined in a thread, increment 'new messages since load' and change Last message date and sender
 socket.on('notifyInThreadList', function(thread, date, sender) {  
     var _date = new Date(date);
-    var $lastActivity = $('#threads a[href=' + thread+ '] .threadLastActivity .value');
-    $lastActivity.eq(0).text(showDate(_date) + ' ' + showTime(_date));
-    $lastActivity.eq(1).html(sender);
-    var $number = $('#threads a[href=' + thread+ '] .threadNewMessages .value');
-    $number.text(Number($number.text()) + 1);
+    if ($lastActivity[thread].eq(0).text() === '') {
+        $('.deleteThread', $threadLi[thread]).remove();
+    }
+    $lastActivity[thread].eq(0).text(showDate(_date) + ' ' + showTime(_date));
+    $lastActivity[thread].eq(1).html(sender);
+    $numberOfMessages[thread].text(Number($numberOfMessages[thread].text()) + 1);
 });
 
 socket.on('editThread', function(id, name) {
-    $('#threads li[data-id=' + id + '] .threadName').html(name);
+    $('.threadName', $threadLi[id]).html(name);
     if (myThreads.indexOf(id) !== -1) {
         $('.threadHeaderName', $h3[id]).html(name);
     }
 });
 
 socket.on('deleteThread', function(id) {
-    $('#threads li[data-id=' + id + ']').remove();
+    removeThreadListElements(id);
     if (myThreads.indexOf(id) !== -1) {
         myThreads.splice(myThreads.indexOf(id), 1);
-        removeElements(id);
+        removeThreadElements(id);
     }
 });
 
 socket.on('showError', function(header, message) {
-    swal({
-        type:'error',
-        title: header,
-        text: message,
-    });
+    setTimeout(function() {
+        swal({
+            type:'error',
+            title: header,
+            text: message,
+        });
+    }, 250);
 });
 
 socket.on('showSuccess', function(header, message) {
@@ -124,10 +128,10 @@ socket.on('showSuccess', function(header, message) {
 
 //styling and display behaviour of app
 //caching objects into $variable[threadid] reference, if first is provided, cache height of elements for resizing as well
-var $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $textarea = [], $close = [],
+var $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $textarea = [], $close = [], $lastActivity = [], $numberOfMessages = [], $threadLi = [],
     textareaHeight, h3Height;
     
-function cacheElements(thread, first) {
+function cacheThreadElements(thread, first) {
     $thread[thread] = $('.threadContainer[data-id=' + thread + ']');
     $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
     $messages[thread] = $('.messages', $thread[thread]);
@@ -143,7 +147,7 @@ function cacheElements(thread, first) {
 }
 
 //removing object references and removing thread element on leaving
-function removeElements(thread) {
+function removeThreadElements(thread) {
     $thread[thread].remove();
     $thread[thread] = undefined;
     $messagesContainer[thread] = undefined;
@@ -152,7 +156,19 @@ function removeElements(thread) {
     $notification[thread] = undefined;
     $textarea[thread] = undefined;
     $close[thread] = undefined;
-    lastDate[thread] = undefined
+    lastDate[thread] = undefined;
+}
+
+function cacheThreadListElements(thread) {
+    $threadLi[thread] = $('#threads li[data-id=' + thread + ']');
+    $lastActivity[thread] = $('.threadLastActivity .value', $threadLi[thread]);
+    $numberOfMessages[thread] = $('.threadNewMessages .value', $threadLi[thread]);   
+}
+
+function removeThreadListElements(thread) {
+    $threadLi[thread].remove();
+    $lastActivity[thread] = undefined;
+    $numberOfMessages[thread] = undefined;
 }
 
 //creates thread window element after joining thread
@@ -187,7 +203,9 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div>';
     if (creator === myUsername) {
         html += '<i class="fa fa-pencil editThread"></i>';
-        html += '<i class="fa fa-trash deleteThread"></i>';
+        if (lastSender === null) {
+            html += '<i class="fa fa-trash deleteThread"></i>'; 
+        }
     }
     li.html(html);
     makeJoinable(li, id);
@@ -252,7 +270,7 @@ function makeClosable(id) {
     $close[id].click(function() { //close icon functionality
         socket.emit('leaveThread', id);
         myThreads.splice(myThreads.indexOf(id), 1);
-        removeElements(id);
+        removeThreadElements(id);
     });
 }
 
