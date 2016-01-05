@@ -10,18 +10,13 @@ $('button#createThread').click(function() {
         text:'You can enter any characters you want.',
         type:'input',
         showCancelButton:true,
-        closeOnConfirm:false     
+        closeOnConfirm:true    
     }, function(inputValue) {
         if (inputValue === false) return false;
         if (inputValue === '') {
             swal.showInputError("You need to write something!");
             return false;
         }
-        swal({
-            title:'Success!',
-            text:'You have created a room called ' + inputValue + '.',
-            type:'success'
-        })
         socket.emit('createThread', inputValue); 
     });
 	
@@ -57,8 +52,9 @@ socket.on('joinThread', function(messages, id, name) {
     makeClosable(id);
     $messages[id].text('');
 	messages.forEach(function(message) {
-		$messages[id].append(Message(id, message.date, message.sender, message.content));	
+		$messages[id].append(Message(message.id, message.thread, message.date, message.sender, message.content));	
 	});
+    scrollToLastMessage(id);
     makeTextareaSubmittable(id);
 });
 
@@ -72,12 +68,12 @@ function submitMessage(id) { //on form submit
 }
 
 //on receiving a message
-socket.on('message', function(thread, date, sender, content) {
+socket.on('message', function(id, thread, date, sender, content) {
     var wasAtBottom = isAtBottom($messages[thread]); //needs to be determined before appending the new message
     if (myUsername !== sender) { //if someone else sends it, notify
         notifyOfNewMessage(thread);   
     }   
-	$messages[thread].append(Message(thread, date, sender, content));
+	$messages[thread].append(Message(id, thread, date, sender, content));
     if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
         scrollToLastMessage(thread, true);    
     }   
@@ -93,12 +89,29 @@ socket.on('notifyInThreadList', function(thread, date, sender) {
     $number.text(Number($number.text()) + 1);
 });
 
+socket.on('editThread', function(id, name) {
+    $('#threads li[data-id=' + id + '] .threadName').html(name);
+    if (myThreads.indexOf(id) !== -1) {
+        $('.threadHeaderName', $h3[id]).html(name);
+    }
+});
+
 socket.on('showError', function(header, message) {
     swal({
         type:'error',
         title: header,
         text: message,
-    })
+    });
+});
+
+socket.on('showSuccess', function(header, message) {
+    setTimeout(function() {
+        swal({
+            type:'success',
+            title: header,
+            text: message,
+        });
+    }, 250);
 });
 
 //styling and display behaviour of app
@@ -107,7 +120,7 @@ var $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notificati
     textareaHeight, h3Height;
     
 function cacheElements(thread, first) {
-    $thread[thread] = $('#thread' + thread);
+    $thread[thread] = $('.threadContainer[data-id=' + thread + ']');
     $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
     $messages[thread] = $('.messages', $thread[thread]);
     $h3[thread] = $('h3', $thread[thread]);
@@ -138,10 +151,9 @@ function removeElements(thread) {
 function ThreadWindow(id, name) { //creating new element for joining
     var div = $('<div/>', { //create empty div
         class: 'threadContainer',
-        id: 'thread' + id
-    }),
+    }).attr('data-id', id),
     html = ''; //insert empty list of messages and form into it
-    html += '<h3><i class="fa fa-comment-o notification"></i> ' + name + '<i class="fa fa-times close"></i></h3>';
+    html += '<h3><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
     html += '<div class="messagesContainer">';
     html += '<ul class="messages"></ul>';
     html += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
@@ -153,32 +165,37 @@ function ThreadWindow(id, name) { //creating new element for joining
 
 //creates thread list item element after connection or upon creation of new thread
 function ThreadListItem(id, name, creator, lastActivity, lastSender) {
-    var a = $('<a/>', {
-        href: id
-    }),
+    var li = $('<li/>', {
+    }).attr('data-id', id),
         _date = new Date(lastActivity),
         html = '';
-    html += '<li><div class="threadName">' + name + '</div><div class="threadFlex">';
+    html += '<div class="threadName">' + name + '</div><div class="threadFlex">';
     html += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
     if (lastSender === null) {
         html += '<span class="threadLastActivity">Last message: <span class="value"></span> - <span class="value"></span></span>';   
     } else {
         html += '<span class="threadLastActivity">Last message: <span class="value">' + showDate(_date) + ' ' + showTime(_date) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
     }
-    html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div></li>';
-    a.html(html);
-    makeJoinable(a, id);
-    return a;
+    html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div>';
+    if (creator === myUsername) {
+        html += '<i class="fa fa-pencil editThread"></i>';
+    }
+    li.html(html);
+    makeJoinable(li, id);
+    if (creator === myUsername) {
+        makeThreadEditable(li, id);
+    }
+    return li;
 }
 
 //creates new message element upon socket joining thread
-function Message(thread, date, sender, content) {
-    var li = $('<li/>'),
+function Message(id, thread, date, sender, content) {
+    var li = $('<li/>').attr('data-id', id),
         _date = new Date(date),
         d = showDate(_date),
         t = showTime(_date),
         html = '';
-    if (lastDate[thread] !== d) {
+    if (lastDate[thread] !== d) { //shows date if it's different to the message before
         lastDate[thread] = d;
         html += '<div class="messageDate">' + d + '</div>';   
     }
@@ -231,13 +248,15 @@ function makeClosable(id) {
 
 function makeJoinable(a, id) {
     $(a).click(function(e) { //when you click on thread, join it
-        e.preventDefault();
-        if (myThreads.indexOf(id) === -1) { //if not already joined, join
-            socket.emit('joinThread', id); 
-        } else {
-             if ($thread[id].hasClass('collapsed') === true) { //else uncollapse already joined thread
-                 collapse(id);
-             }
+        if (e.target.classList[0] !== 'fa') { //if not clicked on icon
+            e.preventDefault();
+            if (myThreads.indexOf(id) === -1) { //if not already joined, join
+                socket.emit('joinThread', id); 
+            } else {
+                if ($thread[id].hasClass('collapsed') === true) { //else uncollapse already joined thread
+                    collapse(id);
+                }
+            }
         }
 	});
 }
@@ -270,6 +289,25 @@ function makeTextareaSubmittable(id) {
                 $(this).val(s + "\n");
             }       
         }
+    });
+}
+
+function makeThreadEditable(a, id) {
+    $('i.editThread', a).click(function(e) {
+        swal({
+            type:'input',
+            title:'Change the name',
+            text:'You may change the name or delete the whole thread instead.',
+            inputValue:$('.threadName', a).html(),
+            showCancelButton:true,
+            confirmButtonText:'Change name',
+            closeOnConfirm:true,
+            allowOutsideClick:true
+        }, function(inputValue) {
+            if (inputValue) {
+                socket.emit('editThread', id, inputValue);
+            }           
+        });
     });
 }
 

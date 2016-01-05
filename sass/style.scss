@@ -77,61 +77,61 @@ h2{
 #threads{
     list-style-type:none;
     padding-left:0;
-    width:100%;
-    
-    a{       
-        color:#666;
-        text-decoration:none;
+    width:100%;   
        
-        li{    
-            padding:1em;
-            margin-bottom:1em;
-            transition: color 0.2s, background-color 0.2s;
-            line-height:2em;
-            overflow:hidden;
-            text-overflow:ellipsis; 
-            position:relative;    
-            
-            .threadName {
-                transition: color 0.2s;
-                color:$dark-orange;
-                font-weight:bold;
-                font-size:1.2em;
-            }    
+    li{    
+        padding:1em;
+        margin-bottom:1em;
+        transition: color 0.2s, background-color 0.2s;
+        line-height:2em;
+        overflow:hidden;
+        text-overflow:ellipsis; 
+        position:relative; 
+        color:#666;
+        text-decoration:none; 
+        cursor:pointer;
         
-            .threadFlex {
-                display:flex;      
-                span{
-                    flex-basis:0px;
-                }        
-            }
-            
-            .threadCreator{
-                flex-grow:0.6;
-            }
-            
-            .threadLastActivity {
-                text-align:left;
-                flex-grow:1;
-            }
-            
-            .threadNewMessages {
-                flex-grow:0.6;
-                text-align:right;
-            }
+        .editThread {
+            position:absolute;
+            top:0.5em;
+            right:0.5em;
+        }  
+        
+        .threadName {
+            transition: color 0.2s;
+            color:$dark-orange;
+            font-weight:bold;
+            font-size:1.2em;
+        }    
+    
+        .threadFlex {
+            display:flex;      
+            span{
+                flex-basis:0px;
+            }        
         }
-  
+        
+        .threadCreator{
+            flex-grow:0.6;
+        }
+        
+        .threadLastActivity {
+            text-align:left;
+            flex-grow:1;
+        }
+        
+        .threadNewMessages {
+            flex-grow:0.6;
+            text-align:right;
+        }
+             
         &:hover{
             color:white; 
+            background-color:$light-orange;
             
             .threadName{
                 color:white;
-            }
-            
-            li{
-                background-color:$light-orange;
-            }
-            
+            }                  
         }
     }
 }
