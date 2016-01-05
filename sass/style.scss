@@ -94,8 +94,14 @@ h2{
         .editThread {
             position:absolute;
             top:0.5em;
-            right:0.5em;
+            right:2em;
         }  
+        
+        .deleteThread {
+            position:absolute;
+            top:0.5em;
+            right:0.5em;
+        }
         
         .threadName {
             transition: color 0.2s;

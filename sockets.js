@@ -101,15 +101,13 @@ module.exports = function(io) {
     //thread and message editing and deleting
     socket.on('editThread', function(id, name) {
         name = validator.escape(validator.trim(name));
-        var creator = null;
         
         if (name === '') {
             socket.emit('showError', '', 'You cannot rename a thread to a blank string.');
             return false;
         } else {        
             db.get('SELECT creator FROM threads WHERE id = ?', id, function(err, row) {
-                creator = row.creator;
-                if (creator === socket.username) {
+                if (row.creator === socket.username) {
                     db.run("UPDATE threads SET name = ? WHERE id = ?", name, id);
                     socket.emit('showSuccess', 'Thread renamed', 'It is now called ' + name);
                     io.emit('editThread', id, name);
@@ -121,6 +119,18 @@ module.exports = function(io) {
         }
     });
     
+    socket.on('deleteThread', function(id) {
+        db.get('SELECT creator FROM threads WHERE id = ?', id, function(err, row) {
+            if (row.creator === socket.username) {
+                db.run("DELETE FROM threads WHERE id = ?", id);
+                socket.emit('showSuccess', 'Thread deleted', 'Rest in peace.');
+                io.emit('deleteThread', id);
+            } else {
+                socket.emit('showError', '', 'You can only delete threads which you have created.');
+                return false;
+            }
+        });
+    });  
     
     //on disconnect of socket    
     socket.on('disconnect', function() {

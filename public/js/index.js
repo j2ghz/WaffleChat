@@ -96,6 +96,14 @@ socket.on('editThread', function(id, name) {
     }
 });
 
+socket.on('deleteThread', function(id) {
+    $('#threads li[data-id=' + id + ']').remove();
+    if (myThreads.indexOf(id) !== -1) {
+        myThreads.splice(myThreads.indexOf(id), 1);
+        removeElements(id);
+    }
+});
+
 socket.on('showError', function(header, message) {
     swal({
         type:'error',
@@ -179,11 +187,13 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div>';
     if (creator === myUsername) {
         html += '<i class="fa fa-pencil editThread"></i>';
+        html += '<i class="fa fa-trash deleteThread"></i>';
     }
     li.html(html);
     makeJoinable(li, id);
     if (creator === myUsername) {
         makeThreadEditable(li, id);
+        makeThreadDeletable(li, id);
     }
     return li;
 }
@@ -307,6 +317,24 @@ function makeThreadEditable(a, id) {
             if (inputValue) {
                 socket.emit('editThread', id, inputValue);
             }           
+        });
+    });
+}
+
+function makeThreadDeletable(a, id) {
+    $('i.deleteThread', a).click(function(e) {
+        swal({
+            type:'warning',
+            title:'Delete the thread?',
+            text:'This action is irreversible.',
+            showCancelButton:true,
+            confirmButtonText:'Delete',
+            closeOnConfirm:true,
+            allowOutsideClick:true
+        }, function(isConfirm) {
+            if (isConfirm) {
+                socket.emit('deleteThread', id);
+            }         
         });
     });
 }
