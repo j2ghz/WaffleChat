@@ -87,7 +87,7 @@ app.use(function(err, req, res, next) {
     if (err.status === 401 || err.status === 422) {
         res.status(err.status);
         res.render('login', {
-            message: err.message
+            alertMessage: err.message
         });
     } else {
         next(err);

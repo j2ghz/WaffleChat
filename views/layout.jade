@@ -13,4 +13,11 @@ html
     script(src="https://cdn.rawgit.com/nfrasser/linkify-shim/master/linkify.min.js")
     script(src="https://cdn.rawgit.com/nfrasser/linkify-shim/master/linkify-jquery.min.js")
     script(src="js/index.js")
-    
+    script.
+        if ('#{alertMessage}') {
+            swal({
+                type:'error',
+                title: '',
+                text:'#{alertMessage}'
+            });
+        }
