@@ -91,16 +91,17 @@ h2{
         text-decoration:none; 
         cursor:pointer;
         
-        .editThread {
+        .editThread, .deleteThread {
             position:absolute;
             top:0.5em;
-            right:2em;
+        }
+        
+        .editThread {
+            right:0.5em;
         }  
         
         .deleteThread {
-            position:absolute;
-            top:0.5em;
-            right:0.5em;
+            right:2em;
         }
         
         .threadName {

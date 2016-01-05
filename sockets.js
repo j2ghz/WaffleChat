@@ -69,6 +69,7 @@ module.exports = function(io) {
     
     //on user leaving thread
     socket.on('leaveThread', function(id) {
+        id = validator.toInt(id);
         socket.leave(id);
     });
      
@@ -100,6 +101,7 @@ module.exports = function(io) {
     
     //thread and message editing and deleting
     socket.on('editThread', function(id, name) {
+        id = validator.toInt(id);
         name = validator.escape(validator.trim(name));
         
         if (name === '') {
@@ -120,14 +122,21 @@ module.exports = function(io) {
     });
     
     socket.on('deleteThread', function(id) {
-        db.get('SELECT creator FROM threads WHERE id = ?', id, function(err, row) {
-            if (row.creator === socket.username) {
-                db.run("DELETE FROM threads WHERE id = ?", id);
-                socket.emit('showSuccess', 'Thread deleted', 'Rest in peace.');
-                io.emit('deleteThread', id);
+        id = validator.toInt(id);
+        db.get('SELECT lastActivity FROM threads WHERE id = ?', id, function(err, row) {
+            if (row.lastActivity === null) {
+                db.get('SELECT creator FROM threads WHERE id = ?', id, function(err, row) {
+                    if (row.creator === socket.username) {
+                        db.run("DELETE FROM threads WHERE id = ?", id);
+                        socket.emit('showSuccess', 'Thread deleted', 'Rest in peace.');
+                        io.emit('deleteThread', id);
+                    } else {
+                        socket.emit('showError', '', 'You can only delete threads which you have created.');
+                        return false;
+                    }
+                });     
             } else {
-                socket.emit('showError', '', 'You can only delete threads which you have created.');
-                return false;
+                socket.emit('showError', '', 'You can only delete empty threads.');
             }
         });
     });  
