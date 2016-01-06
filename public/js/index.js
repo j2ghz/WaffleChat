@@ -64,7 +64,7 @@ socket.on('joinThread', function(messages, id, name) {
         $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
 	});
     
-    scrollToLastMessage(id);
+    $thread[id]._scrollToLastMessage(false);
 });
 
 
@@ -88,7 +88,7 @@ socket.on('message', function(id, thread, date, sender, content) {
         Message(id, thread, date, sender, content)
     );   
     if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
-        scrollToLastMessage(thread, true);    
+        $thread[thread]._scrollToLastMessage(true);
     }   
 });
 
@@ -235,15 +235,6 @@ $(window).resize(function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(resizeMessages, 250); //resize throttling
 });
-
-//scroll to last message in given thread, animation boolean
-function scrollToLastMessage(id, animation) { 
-    var duration = 0;
-    if (animation === true) { duration = 400; }
-    $thread[id].cached.messages.animate({
-        scrollTop: $thread[id].cached.messages[0].scrollHeight, //scroll to bottom
-    }, duration);
-}
 
 function makeJoinable(a, id) {
     $(a).click(function(e) { //when you click on thread, join it

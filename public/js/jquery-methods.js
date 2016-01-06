@@ -1,3 +1,5 @@
+/* global myThreads */
+/* global socket */
 (function($) { 
     // --- MISC ---
     //determine whether scrolling is possible or not
@@ -45,7 +47,7 @@
         }
         
         if (this.hasClass('collapsed') === false && this.cached.notification.hasClass('fa-comment') === true) { //if notification is up and you uncollapse it
-            scrollToLastMessage(id, true); //scroll down and remove notification
+            this._scrollToLastMessage(true); //scroll down and remove notification
             this._hideNotification(id);
         }  
         return this;
@@ -123,5 +125,15 @@
                 });
             }
         }
+    }
+    
+    //scroll to last message in given thread, animation boolean
+    $.fn._scrollToLastMessage = function(animation) { 
+        var id = this.data('id'), duration = 0;
+        
+        if (animation === true) { duration = 400; }
+        $thread[id].cached.messages.animate({
+            scrollTop: $thread[id].cached.messages[0].scrollHeight, //scroll to bottom
+        }, duration);
     }
 })(jQuery);
