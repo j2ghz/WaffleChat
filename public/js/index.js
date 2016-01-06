@@ -66,15 +66,6 @@ socket.on('joinThread', function(messages, id, name) {
     $thread[id]._scrollToLastMessage(false);
 });
 
-//sending a message
-function submitMessage(id) { //on form submit
-    var textarea = $thread[id].cached.textarea;
-    if (textarea.val() !== '') { //if not empty
-        socket.emit('message', id, textarea.val()); //send value and thread id to server
-        textarea.val(''); //set input value back to nothing
-    }
-}
-
 //on receiving a message
 socket.on('message', function(id, thread, date, sender, content) {
     var wasAtBottom = $thread[thread].cached.messages._isAtBottom(); //needs to be determined before appending the new message
@@ -148,7 +139,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     html += '<h3><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
     html += '<div class="messagesContainer">';
     html += '<ul class="messages"></ul>';
-    html += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
+    html += '<form class="messageForm" data-id="' + id + '">';
     html += '<textarea autocomplete="off"></textarea>';
     html += '</form></div>';
     div.html(html); //put content inside empty div     

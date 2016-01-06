@@ -22,6 +22,7 @@
 // --- THREAD WINDOW ---
     $.fn._cacheThread = function() {
         this.cached = {
+            form:$('form', this),
             textarea:$('textarea', this),
             close:$('i.close', this),
             messagesContainer:$('.messagesContainer', this),
@@ -70,7 +71,18 @@
     }
     
     $.fn._makeSubmittable = function() {
-        this.cached.textarea.keydown(function(e) {
+        var textarea = this.cached.textarea,
+            id = this.data('id');
+        
+        this.cached.form.submit(function (){
+            if (textarea.val() !== '') { //if not empty
+                socket.emit('message', id, textarea.val()); //send value and thread id to server
+                textarea.val(''); //set input value back to nothing
+            }
+            return false;
+        });       
+        
+        textarea.keydown(function(e) {
             if (e.keyCode == 13) {
                 e.preventDefault();
                 if (e.shiftKey === false) {
@@ -132,11 +144,11 @@
     
     //scroll to last message in given thread, animation boolean
     $.fn._scrollToLastMessage = function(animation) { 
-        var id = this.data('id'), duration = 0;
+        var duration = 0;
         
         if (animation === true) { duration = 400; }
-        $thread[id].cached.messages.animate({
-            scrollTop: $thread[id].cached.messages[0].scrollHeight, //scroll to bottom
+        this.cached.messages.animate({
+            scrollTop: this.cached.messages[0].scrollHeight, //scroll to bottom
         }, duration);
         return this;
     }
@@ -161,20 +173,20 @@
                 if (myThreads.indexOf(id) === -1) { //if not already joined, join
                     socket.emit('joinThread', id); 
                 } else {
-                    $thread[id]._collapse();
+                    this._collapse();
                 }
             }
         });
     }
 
     $.fn._makeThreadEditable = function() {
-        var id = this.data('id');
+        var id = this.data('id'), _this = this;
         this.cached.editThread.click(function(e) {
             swal({
                 type:'input',
                 title:'Change the name',
                 text:'You may change the name or delete the whole thread instead.',
-                inputValue:$threadLi[id].cached.threadName.html(),
+                inputValue:_this.cached.threadName.html(),
                 showCancelButton:true,
                 confirmButtonText:'Change name',
                 closeOnConfirm:true,
