@@ -47,13 +47,11 @@ socket.on('printThread', function(id, name, creator) {
 
 //after joining and creation of element, print all messages
 socket.on('joinThread', function(messages, id, name) {
-    var threadWindow = ThreadWindow(id, name);
-    $chatContainer.append(
-        threadWindow
-    ); 
+    var threadWindow = ThreadWindow(id, name);    
+    $chatContainer.append(threadWindow); 
     
     myThreads.push(id);
-    $thread[id] = threadWindow //put objects in $variables
+    $thread[id] = threadWindow //cache main thread window
     if (myThreads.length === 1) { //if this is the first window to be created, set boolean to true    
         textareaHeight = $thread[id].cached.textarea.outerHeight();
         h3Height = $thread[id].cached.h3.outerHeight();
@@ -86,7 +84,6 @@ socket.on('message', function(id, thread, date, sender, content) {
     if (myUsername !== sender) { //if someone else sends it, notify
         $thread[thread]._notifyOfNewMessage();   
     }  
-    console.log($thread[thread].cached.messages);
 	$thread[thread].cached.messages.append(
         Message(id, thread, date, sender, content)
     );   
@@ -109,7 +106,7 @@ socket.on('notifyInThreadList', function(thread, date, sender) {
 socket.on('editThread', function(id, name) {
     $('.threadName', $threadLi[id]).html(name);
     if (myThreads.indexOf(id) !== -1) {
-        $('.threadHeaderName', $h3[id]).html(name);
+        $('.threadHeaderName', $thread[id].cached.h3).html(name);
     }
 });
 
@@ -171,7 +168,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     html += '<textarea autocomplete="off"></textarea>';
     html += '</form></div>';
     div.html(html); //put content inside empty div     
-    div._cache();  
+    div._cacheThread();  
     div._makeCollapsible(); //collapsing behaviour
     div._makeClosable();
     div._makeSubmittable();

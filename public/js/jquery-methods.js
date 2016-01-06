@@ -10,7 +10,7 @@
     }
     
     // --- THREAD WINDOW ---
-    $.fn._cache = function() {
+    $.fn._cacheThread = function() {
         this.cached = {
             textarea:$('textarea', this),
             close:$('i.close', this),
