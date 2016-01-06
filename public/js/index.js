@@ -1,7 +1,9 @@
 /* global swal */
-/* global io from another file, provided by index.jade */
+/* global io */
 var socket = io(), myUsername, myThreads = [], lastDate = [],
-    $chatContainer = $('#chatContainer'), $threads = $('#threads'); //caching jquery objects  
+    $chatContainer = $('#chatContainer'), $threads = $('#threads'), //caching jquery objects  
+    $thread = [], $threadLi = [],
+    textareaHeight, h3Height;
 
 //on document load
 $(document).ready(function() { 
@@ -34,7 +36,6 @@ socket.on('printThreads', function(threads) {
 		$threads.prepend(
             ThreadListItem(thread.id, thread.name, thread.creator, thread.lastActivity, thread.lastSender)
         );	
-        cacheThreadListElements(thread.id);
 	});    
 });
 
@@ -42,7 +43,6 @@ socket.on('printThread', function(id, name, creator) {
     $threads.prepend(
         ThreadListItem(id, name, creator, null, null)
     );
-    cacheThreadListElements(id);
 });
 
 //after joining and creation of element, print all messages
@@ -51,7 +51,7 @@ socket.on('joinThread', function(messages, id, name) {
     $chatContainer.append(threadWindow); 
     
     myThreads.push(id);
-    $thread[id] = threadWindow //cache main thread window
+    
     if (myThreads.length === 1) { //if this is the first window to be created, set boolean to true    
         textareaHeight = $thread[id].cached.textarea.outerHeight();
         h3Height = $thread[id].cached.h3.outerHeight();
@@ -62,11 +62,9 @@ socket.on('joinThread', function(messages, id, name) {
     $thread[id].cached.messages.text('');
 	messages.forEach(function(message) {
         $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
-	});
-    
+	});   
     $thread[id]._scrollToLastMessage(false);
 });
-
 
 //sending a message
 function submitMessage(id) { //on form submit
@@ -94,13 +92,16 @@ socket.on('message', function(id, thread, date, sender, content) {
 
 //when not joined in a thread, increment 'new messages since load' and change Last message date and sender
 socket.on('notifyInThreadList', function(thread, date, sender) {  
-    var _date = new Date(date);
-    if ($lastActivity[thread].eq(0).text() === '') {
-        $('.deleteThread', $threadLi[thread]).remove();
+    var _date = new Date(date),
+        $lastActivity = $threadLi[thread].cached.lastActivity,
+        $numberOfMessages = $threadLi[thread].cached.numberOfMessages;
+    
+    if ($lastActivity.eq(0).text() === '') {
+        $threadLi[thread].cached.deleteThread.remove();
     }
-    $lastActivity[thread].eq(0).text(showDate(_date) + ' ' + showTime(_date));
-    $lastActivity[thread].eq(1).html(sender);
-    $numberOfMessages[thread].text(Number($numberOfMessages[thread].text()) + 1);
+    $lastActivity.eq(0).text(showDate(_date) + ' ' + showTime(_date));
+    $lastActivity.eq(1).html(sender);
+    $numberOfMessages.text(Number($numberOfMessages.text()) + 1);
 });
 
 socket.on('editThread', function(id, name) {
@@ -111,7 +112,7 @@ socket.on('editThread', function(id, name) {
 });
 
 socket.on('deleteThread', function(id) {
-    removeThreadListElements(id);
+    $threadLi[id].remove();
     if (myThreads.indexOf(id) !== -1) {
         myThreads.splice(myThreads.indexOf(id), 1);
         $thread[id].remove();
@@ -138,23 +139,6 @@ socket.on('showSuccess', function(header, message) {
     }, 250);
 });
 
-//styling and display behaviour of app
-//caching objects into $variable[threadid] reference, if first is provided, cache height of elements for resizing as well
-var $thread = [], $lastActivity = [], $numberOfMessages = [], $threadLi = [],
-    textareaHeight, h3Height;
-
-function cacheThreadListElements(thread) {
-    $threadLi[thread] = $('#threads li[data-id=' + thread + ']');
-    $lastActivity[thread] = $('.threadLastActivity .value', $threadLi[thread]);
-    $numberOfMessages[thread] = $('.threadNewMessages .value', $threadLi[thread]);   
-}
-
-function removeThreadListElements(thread) {
-    $threadLi[thread].remove();
-    $lastActivity[thread] = undefined;
-    $numberOfMessages[thread] = undefined;
-}
-
 //creates thread window element after joining thread
 function ThreadWindow(id, name) { //creating new element for joining
     var div = $('<div/>', { //create empty div
@@ -168,6 +152,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     html += '<textarea autocomplete="off"></textarea>';
     html += '</form></div>';
     div.html(html); //put content inside empty div     
+    $thread[id] = div;
     div._cacheThread();  
     div._makeCollapsible(); //collapsing behaviour
     div._makeClosable();
@@ -195,10 +180,12 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
         }
     }
     li.html(html);
-    makeJoinable(li, id);
+    $threadLi[id] = li;
+    li._cacheThreadLi();
+    li._makeJoinable();
     if (creator === myUsername) {
-        makeThreadEditable(li, id);
-        makeThreadDeletable(li, id);
+        li._makeThreadEditable();
+        li._makeThreadDeletable();
     }
     return li;
 }
@@ -235,56 +222,6 @@ $(window).resize(function() {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(resizeMessages, 250); //resize throttling
 });
-
-function makeJoinable(a, id) {
-    $(a).click(function(e) { //when you click on thread, join it
-        if (e.target.classList[0] !== 'fa') { //if not clicked on icon
-            e.preventDefault();
-            if (myThreads.indexOf(id) === -1) { //if not already joined, join
-                socket.emit('joinThread', id); 
-            } else {
-                $thread[id]._collapse();
-            }
-        }
-	});
-}
-
-function makeThreadEditable(a, id) {
-    $('i.editThread', a).click(function(e) {
-        swal({
-            type:'input',
-            title:'Change the name',
-            text:'You may change the name or delete the whole thread instead.',
-            inputValue:$('.threadName', a).html(),
-            showCancelButton:true,
-            confirmButtonText:'Change name',
-            closeOnConfirm:true,
-            allowOutsideClick:true
-        }, function(inputValue) {
-            if (inputValue) {
-                socket.emit('editThread', id, inputValue);
-            }           
-        });
-    });
-}
-
-function makeThreadDeletable(a, id) {
-    $('i.deleteThread', a).click(function(e) {
-        swal({
-            type:'warning',
-            title:'Delete the thread?',
-            text:'This action is irreversible.',
-            showCancelButton:true,
-            confirmButtonText:'Delete',
-            closeOnConfirm:true,
-            allowOutsideClick:true
-        }, function(isConfirm) {
-            if (isConfirm) {
-                socket.emit('deleteThread', id);
-            }         
-        });
-    });
-}
 
 //parses date object into string
 function showDate(date) {

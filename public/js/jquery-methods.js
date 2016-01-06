@@ -1,7 +1,7 @@
 /* global myThreads */
 /* global socket */
 (function($) { 
-    // --- MISC ---
+// --- MISC ---
     //determine whether scrolling is possible or not
     $.fn._hasScrollBar = function() {
         var e = this.get(0);
@@ -11,7 +11,15 @@
         };
     }
     
-    // --- THREAD WINDOW ---
+    $.fn._isAtBottom = function() {
+        if (Math.floor(this.scrollTop() + this.height()) === this[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+// --- THREAD WINDOW ---
     $.fn._cacheThread = function() {
         this.cached = {
             textarea:$('textarea', this),
@@ -77,24 +85,18 @@
         return this;
     }
     
-    $.fn._isAtBottom = function() {
-        if (Math.floor(this.scrollTop() + this.height()) === this[0].scrollHeight) { //if is scrolled to the bottom, continue showing new messages
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
     $.fn._hideNotification = function() {
         this.cached.notification.addClass('fa-comment-o');
         this.cached.h3.removeClass('notifying');
         this.cached.notification.removeClass('fa-comment');
+        return this;
     }
 
      $.fn._showNotification = function() {
         this.cached.notification.addClass('fa-comment');
         this.cached.h3.addClass('notifying');
         this.cached.notification.removeClass('fa-comment-o');
+        return this;
     }
     
     //notify of new message
@@ -125,6 +127,7 @@
                 });
             }
         }
+        return this;
     }
     
     //scroll to last message in given thread, animation boolean
@@ -135,5 +138,71 @@
         $thread[id].cached.messages.animate({
             scrollTop: $thread[id].cached.messages[0].scrollHeight, //scroll to bottom
         }, duration);
+        return this;
+    }
+    
+// --- THREAD LIST ---
+    $.fn._cacheThreadLi = function() {
+        this.cached = {
+            lastActivity:$('.threadLastActivity .value', this),
+            numberOfMessages:$('.threadNewMessages .value', this),
+            editThread:$('i.editThread', this),
+            deleteThread:$('i.deleteThread', this),
+            threadName:$('.threadName', this)
+        }
+        return this;
+    }
+    
+    $.fn._makeJoinable = function() {
+        var id = this.data('id');
+        this.click(function(e) { //when you click on thread, join it
+            if (e.target.classList[0] !== 'fa') { //if not clicked on icon
+                e.preventDefault();
+                if (myThreads.indexOf(id) === -1) { //if not already joined, join
+                    socket.emit('joinThread', id); 
+                } else {
+                    $thread[id]._collapse();
+                }
+            }
+        });
+    }
+
+    $.fn._makeThreadEditable = function() {
+        var id = this.data('id');
+        this.cached.editThread.click(function(e) {
+            swal({
+                type:'input',
+                title:'Change the name',
+                text:'You may change the name or delete the whole thread instead.',
+                inputValue:$threadLi[id].cached.threadName.html(),
+                showCancelButton:true,
+                confirmButtonText:'Change name',
+                closeOnConfirm:true,
+                allowOutsideClick:true
+            }, function(inputValue) {
+                if (inputValue) {
+                    socket.emit('editThread', id, inputValue);
+                }           
+            });
+        });
+    }
+
+    $.fn._makeThreadDeletable = function() {
+        var id = this.data('id');
+        this.cached.deleteThread.click(function(e) {
+            swal({
+                type:'warning',
+                title:'Delete the thread?',
+                text:'This action is irreversible.',
+                showCancelButton:true,
+                confirmButtonText:'Delete',
+                closeOnConfirm:true,
+                allowOutsideClick:true
+            }, function(isConfirm) {
+                if (isConfirm) {
+                    socket.emit('deleteThread', id);
+                }         
+            });
+        });
     }
 })(jQuery);
