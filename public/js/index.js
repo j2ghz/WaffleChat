@@ -1,7 +1,7 @@
 /* global swal */
 /* global io from another file, provided by index.jade */
 var socket = io(), myUsername, myThreads = [], lastDate = [],
-    $chatContainer = $('#chatContainer'), $threads = $('#threads'), $footer = $('footer'); //caching jquery objects  
+    $chatContainer = $('#chatContainer'), $threads = $('#threads'); //caching jquery objects  
 
 //on document load
 $(document).ready(function() { 
@@ -47,22 +47,23 @@ socket.on('printThread', function(id, name, creator) {
 
 //after joining and creation of element, print all messages
 socket.on('joinThread', function(messages, id, name) {
+    var threadWindow = ThreadWindow(id, name);
     $chatContainer.append(
-        ThreadWindow(id, name) 
+        threadWindow
     ); 
     
     myThreads.push(id);
-    cacheThreadElements(id); //put objects in $variables
+    $thread[id] = threadWindow //put objects in $variables
     if (myThreads.length === 1) { //if this is the first window to be created, set boolean to true    
-        textareaHeight = $textarea[id].outerHeight();
-        h3Height = $h3[id].outerHeight();
+        textareaHeight = $thread[id].cached.textarea.outerHeight();
+        h3Height = $thread[id].cached.h3.outerHeight();
     }
     
     resizeMessages(); //resize elements by window height
     
-    $messages[id].text('');
+    $thread[id].cached.messages.text('');
 	messages.forEach(function(message) {
-		$messages[id].append(Message(message.id, message.thread, message.date, message.sender, message.content));	
+        $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
 	});
     
     scrollToLastMessage(id);
@@ -71,20 +72,22 @@ socket.on('joinThread', function(messages, id, name) {
 
 //sending a message
 function submitMessage(id) { //on form submit
-    if ($textarea[id].val() !== '') { //if not empty
-        socket.emit('message', id, $textarea[id].val()); //send value and thread id to server
-        $textarea[id].val(''); //set input value back to nothing
+    var textarea = $thread[id].cached.textarea;
+    if (textarea.val() !== '') { //if not empty
+        socket.emit('message', id, textarea.val()); //send value and thread id to server
+        textarea.val(''); //set input value back to nothing
     }
 }
 
 //on receiving a message
 socket.on('message', function(id, thread, date, sender, content) {
-    var wasAtBottom = $messages[thread]._isAtBottom(); //needs to be determined before appending the new message
+    var wasAtBottom = $thread[thread].cached.messages._isAtBottom(); //needs to be determined before appending the new message
   
     if (myUsername !== sender) { //if someone else sends it, notify
         $thread[thread]._notifyOfNewMessage();   
-    }     
-	$messages[thread].append(
+    }  
+    console.log($thread[thread].cached.messages);
+	$thread[thread].cached.messages.append(
         Message(id, thread, date, sender, content)
     );   
     if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
@@ -140,18 +143,8 @@ socket.on('showSuccess', function(header, message) {
 
 //styling and display behaviour of app
 //caching objects into $variable[threadid] reference, if first is provided, cache height of elements for resizing as well
-var $thread = [], $messagesContainer = [], $messages = [], $h3 = [], $notification = [], $textarea = [], $close = [], $lastActivity = [], $numberOfMessages = [], $threadLi = [],
+var $thread = [], $lastActivity = [], $numberOfMessages = [], $threadLi = [],
     textareaHeight, h3Height;
-    
-function cacheThreadElements(thread) {
-    $thread[thread] = $('.threadContainer[data-id=' + thread + ']');
-    $messagesContainer[thread] = $('.messagesContainer', $thread[thread]);
-    $messages[thread] = $('.messages', $thread[thread]);
-    $h3[thread] = $('h3', $thread[thread]);
-    $notification[thread] = $('i.notification', $h3[thread]);
-    $textarea[thread] = $('textarea', $thread[thread]);
-    $close[thread] = $('i.close', $h3[thread]);
-}
 
 function cacheThreadListElements(thread) {
     $threadLi[thread] = $('#threads li[data-id=' + thread + ']');
@@ -177,7 +170,8 @@ function ThreadWindow(id, name) { //creating new element for joining
     html += '<form class="messageForm" onSubmit="submitMessage(' + id + ');return false;">';
     html += '<textarea autocomplete="off"></textarea>';
     html += '</form></div>';
-    div.html(html); //put content inside empty div       
+    div.html(html); //put content inside empty div     
+    div._cache();  
     div._makeCollapsible(); //collapsing behaviour
     div._makeClosable();
     div._makeSubmittable();
@@ -249,8 +243,8 @@ $(window).resize(function() {
 function scrollToLastMessage(id, animation) { 
     var duration = 0;
     if (animation === true) { duration = 400; }
-    $messages[id].animate({
-        scrollTop: $messages[id][0].scrollHeight, //scroll to bottom
+    $thread[id].cached.messages.animate({
+        scrollTop: $thread[id].cached.messages[0].scrollHeight, //scroll to bottom
     }, duration);
 }
 
@@ -303,12 +297,6 @@ function makeThreadDeletable(a, id) {
         });
     });
 }
-
-//checks if is scrolled to bottom in given thread
-
-
-//hides or shows notification in given thread
-
 
 //parses date object into string
 function showDate(date) {
