@@ -174,7 +174,7 @@
                 if (myThreads.indexOf(id) === -1) { //if not already joined, join
                     socket.emit('joinThread', id); 
                 } else {
-                    this._collapse();
+                    $thread[id]._collapse();
                 }
             }
         });

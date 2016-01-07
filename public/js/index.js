@@ -1,6 +1,6 @@
 /* global swal */
 /* global io */
-var socket = io(), myUsername, myThreads = [], lastDate = [],
+var socket = io(), myUsername, myThreads, lastDate = [],
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), //caching jquery objects  
     $thread = [], $threadLi = [],
     textareaHeight, h3Height;
@@ -26,6 +26,7 @@ $(document).ready(function() {
 });
 
 socket.on('setUsername', function(name) {
+    myThreads = [];
     myUsername = name;
 });
 
