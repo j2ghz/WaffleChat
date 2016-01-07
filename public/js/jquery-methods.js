@@ -34,13 +34,19 @@
         return this;
     }
     
+    $.fn._close = function() {
+        var id = this.data('id');
+        socket.emit('leaveThread', id);
+        myThreads.splice(myThreads.indexOf(id), 1);
+        this.remove();
+        return this;
+    }
+    
     //make thread closable
     $.fn._makeClosable = function() {
-        var id = this.data('id'), _this = this;
+        var _this = this;
         this.cached.close.click(function() { //close icon functionality
-            socket.emit('leaveThread', id);
-            myThreads.splice(myThreads.indexOf(id), 1);
-            _this.remove();
+            _this._close();
         });
         return this;
     }
