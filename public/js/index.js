@@ -23,6 +23,28 @@ $(document).ready(function() {
             socket.emit('createThread', inputValue); 
         });	
     });  
+    
+    $('#collapseAllThreads').click(function() {
+        $thread.forEach(function(obj) {
+            if(obj.hasClass('collapsed') === false) {
+                obj._collapse();
+            }
+        });
+    });
+    
+    $('#uncollapseAllThreads').click(function() {
+        $thread.forEach(function(obj) {
+            if(obj.hasClass('collapsed') === true) {
+                obj._collapse();
+            }
+        });
+    });
+    
+    $('#closeAllThreads').click(function() {
+        $thread.forEach(function(obj) {
+            obj._close();
+        });
+    });
 });
 
 socket.on('setUsername', function(name) {
@@ -106,8 +128,7 @@ socket.on('editThread', function(id, name) {
 socket.on('deleteThread', function(id) {
     $threadLi[id].remove();
     if (myThreads.indexOf(id) !== -1) {
-        myThreads.splice(myThreads.indexOf(id), 1);
-        $thread[id].remove();
+        $thread[id]._close();
     }
 });
 
