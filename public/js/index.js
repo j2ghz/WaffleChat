@@ -7,7 +7,7 @@ var socket = io(), myUsername, myThreads, lastDate = [],
 
 //on document load
 $(document).ready(function() { 
-    $('button#createThread').click(function() {
+    $('#createThread').click(function() {
         swal({
             title:'Enter a name',
             text:'You may enter a maximum of 255 characters. Any characters.',

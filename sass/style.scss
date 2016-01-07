@@ -57,8 +57,31 @@ h2{
     margin-right:25px;
     flex-shrink:0;
     background-color:$light-orange; 
-    h1, h2, a{
+    color:#fff;
+    padding:0px;
+    box-shadow:0px 20px 70px -20px #000;
+    
+    h1, h2{
         color:#fff;
+        margin:1em;
+    }
+    
+    a{
+        color:#fff;
+        display:inline-block;
+        width:100%;
+        text-decoration:none;
+    }
+    
+    #headerFunctions{
+        list-style-type:none;
+        padding-left:0px;
+        display:flex;
+        flex-direction:column;
+        
+        li{
+            padding:15px;
+        }
     }
 }
 
@@ -68,7 +91,7 @@ h2{
     background-color:#fff; 
 }
 
-#threadsContainer, #headerContainer, .genericContainer, .genericHeaderContainer{
+#threadsContainer, .genericContainer, .genericHeaderContainer{
     overflow:auto;
     box-shadow:0px 20px 70px -20px #000;
     padding:2em;
@@ -303,10 +326,19 @@ h2{
         margin-right:0px;
         width:100%;
         z-index:1;
+        
+        #headerFunctions{
+            flex-direction:row;
+            
+            li{
+                flex-grow:1;
+                text-align:center;
+            }
+        }
     }
     
     #threadsContainer{
-        margin-top:200px;
+        margin-top:250px;
     }
     
     body{

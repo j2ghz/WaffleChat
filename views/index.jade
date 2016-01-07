@@ -5,11 +5,13 @@ block content
         div(id="headerContainer")
             h1 WaffleThread
             h2 Welcome, !{username}!
-            button(id="createThread") Create a thread
-            a(href='/logout') Logout
-            p(id="closeAllThreads") Close all threads
-            p(id="collapseAllThreads") Collapse all threads
-            p(id="uncollapseAllThreads") Uncollapse all threads
+            ul(id="headerFunctions")
+                li(id="createThread") Create a thread
+                li(id="closeAllThreads") Close all threads
+                li(id="collapseAllThreads") Collapse all threads
+                li(id="uncollapseAllThreads") Uncollapse all threads
+                li
+                    a(href='/logout') Logout
         div(id="threadsContainer")
             h1 List of threads         
             ul(id="threads")
