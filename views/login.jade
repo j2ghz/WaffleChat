@@ -13,4 +13,13 @@ block content
             input(type='text', name='username', placeholder='Username',required, autofocus)
             input(type='password', name='password', placeholder='Password', required)
             button(type='submit') Sign up           
-            
+    script.
+        if ('#{alertMessage}') {
+            swal({
+                type:'error',
+                title: '',
+                text:'#{alertMessage}',
+                allowOutsideClick:true
+            });
+        }
+        

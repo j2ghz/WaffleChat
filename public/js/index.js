@@ -10,14 +10,20 @@ $(document).ready(function() {
     $('button#createThread').click(function() {
         swal({
             title:'Enter a name',
-            text:'You can enter any characters you want.',
+            text:'You may enter a maximum of 255 characters. Any characters.',
             type:'input',
             showCancelButton:true,
-            closeOnConfirm:true    
+            closeOnConfirm:false,
+            allowOutsideClick:true,
+            showLoaderOnConfirm:true
         }, function(inputValue) {
             if (inputValue === false) return false;
             if (inputValue === '') {
                 swal.showInputError("You need to write something!");
+                return false;
+            }
+            if (inputValue.length > 255) {
+                swal.showInputError("Maximum length is 255 characters.");
                 return false;
             }
             socket.emit('createThread', inputValue); 
@@ -138,6 +144,7 @@ socket.on('showError', function(header, message) {
             type:'error',
             title: header,
             text: message,
+            allowOutsideClick:true
         });
     }, 250);
 });
@@ -148,6 +155,7 @@ socket.on('showSuccess', function(header, message) {
             type:'success',
             title: header,
             text: message,
+            allowOutsideClick:true
         });
     }, 250);
 });

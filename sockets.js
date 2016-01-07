@@ -35,14 +35,18 @@ module.exports = function(io) {
     socket.on('createThread', function(name) {
         name = validator.escape(validator.trim(name));
         
-        if (name === '') {
-            socket.emit('showError', '', 'You cannot create a thread with a blank name.');
-            return false;
-        } else {
+        if (validator.isLength(name, 1, 255)) {
             db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username, function() {
                 io.emit('printThread', this.lastID, name, socket.username); //update everyone's list upon creation of new one    
             });
             socket.emit('showSuccess', '', 'You have created a room called ' + name + '.');
+        } else {
+            if (name === '') {
+                socket.emit('showError', '', 'You cannot create a thread with a blank name.');
+            } else {
+                socket.emit('showError', 'Too long', 'Maximum length is 255 characters.');
+            }
+            return false;
         }
     });
     
@@ -104,10 +108,7 @@ module.exports = function(io) {
         id = validator.toInt(id);
         name = validator.escape(validator.trim(name));
         
-        if (name === '') {
-            socket.emit('showError', '', 'You cannot rename a thread to a blank string.');
-            return false;
-        } else {        
+        if (validator.isLength(name, 1, 255)) {
             db.get('SELECT creator FROM threads WHERE id = ?', id, function(err, row) {
                 if (row.creator === socket.username) {
                     db.run("UPDATE threads SET name = ? WHERE id = ?", name, id);
@@ -118,6 +119,13 @@ module.exports = function(io) {
                     return false;
                 }
             });
+        } else {
+            if (name === '') {
+                socket.emit('showError', '', 'You cannot rename a thread to a blank string.');
+            } else {
+                socket.emit('showError', 'Too long', 'Maximum length is 255 characters.');
+            }
+        return false;
         }
     });
     
