@@ -82,15 +82,15 @@ socket.on('message', function(id, thread, date, sender, content) {
 });
 
 //when not joined in a thread, increment 'new messages since load' and change Last message date and sender
-socket.on('notifyInThreadList', function(thread, date, sender) {  
-    var _date = new Date(date),
-        $lastActivity = $threadLi[thread].cached.lastActivity,
+socket.on('notifyInThreadList', function(thread, date, sender) { 
+    date = new Date(date); 
+    var $lastActivity = $threadLi[thread].cached.lastActivity,
         $numberOfMessages = $threadLi[thread].cached.numberOfMessages;
     
     if ($lastActivity.eq(0).text() === '') {
         $threadLi[thread].cached.deleteThread.remove();
     }
-    $lastActivity.eq(0).text(showDate(_date) + ' ' + showTime(_date));
+    $lastActivity.eq(0).text(showDate(date) + ' ' + showTime(date));
     $lastActivity.eq(1).html(sender);
     $numberOfMessages.text(Number($numberOfMessages.text()) + 1);
 });
@@ -153,15 +153,15 @@ function ThreadWindow(id, name) { //creating new element for joining
 
 //creates thread list item element after connection or upon creation of new thread
 function ThreadListItem(id, name, creator, lastActivity, lastSender) {
+    lastActivity = new Date(lastActivity);
     var li = $('<li/>').attr('data-id', id),
-        _date = new Date(lastActivity),
         html = '';
     html += '<div class="threadName">' + name + '</div><div class="threadFlex">';
     html += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
     if (lastSender === null) {
         html += '<span class="threadLastActivity">Last message: <span class="value"></span> - <span class="value"></span></span>';   
     } else {
-        html += '<span class="threadLastActivity">Last message: <span class="value">' + showDate(_date) + ' ' + showTime(_date) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
+        html += '<span class="threadLastActivity">Last message: <span class="value">' + showDate(lastActivity) + ' ' + showTime(lastActivity) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
     }
     html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div>';
     if (creator === myUsername) {
@@ -183,10 +183,10 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
 
 //creates new message element upon socket joining thread
 function Message(id, thread, date, sender, content) {
+    date = new Date(date);
     var li = $('<li/>').attr('data-id', id),
-        _date = new Date(date),
-        d = showDate(_date),
-        t = showTime(_date),
+        d = showDate(date),
+        t = showTime(date),
         html = '';
     if (lastDate[thread] !== d) { //shows date if it's different to the message before
         lastDate[thread] = d;
