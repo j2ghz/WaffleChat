@@ -1,3 +1,4 @@
+/* global swal */
 /* global myThreads */
 /* global socket */
 (function($) { 
