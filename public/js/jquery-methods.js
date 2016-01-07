@@ -192,16 +192,23 @@
             swal({
                 type:'input',
                 title:'Change the name',
-                text:'You may change the name or delete the whole thread instead.',
+                text:'You may enter a maximum of 255 characters. Any characters.',
                 inputValue:_this.cached.threadName.html(),
                 showCancelButton:true,
                 confirmButtonText:'Change name',
-                closeOnConfirm:true,
+                closeOnConfirm:false,
                 allowOutsideClick:true
             }, function(inputValue) {
-                if (inputValue) {
-                    socket.emit('editThread', id, inputValue);
-                }           
+                if (inputValue === false) return false;
+                if (inputValue === '') {
+                    swal.showInputError("You need to write something!");
+                    return false;
+                }
+                if (inputValue.length > 255) {
+                    swal.showInputError("Maximum length is 255 characters.");
+                    return false;
+                }
+                socket.emit('editThread', id, inputValue);           
             });
         });
     }
