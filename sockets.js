@@ -3,8 +3,9 @@ var validator = require('validator');
 //this file exports the custom socket.io functionality to app.js and is provided the io object by app.js
 module.exports = function(io) {
   io.on('connection', function(socket) {
-    socket.username = null;
-    socket.userid = null;
+    socket._name = null;
+    socket._id = null;
+    socket._threads = [];
     var session = socket.request.session;
     
     if (session.passport !== undefined) {
@@ -13,10 +14,10 @@ module.exports = function(io) {
                 if (!row) {
                     console.log('user whose id is not in DB connected');
                 } else {
-                    socket.username = row.username;
-                    socket.userid = session.passport.user;
-                    console.log(socket.username + ' connected');
-                    socket.emit('setUsername', socket.username); 
+                    socket._name = row.username;
+                    socket._id = session.passport.user;
+                    console.log(socket._name + ' connected');
+                    socket.emit('setUsername', socket._name); 
                 }
             }); 
         } else {
@@ -36,8 +37,8 @@ module.exports = function(io) {
         name = validator.escape(validator.trim(name));
         
         if (validator.isLength(name, 1, 255)) {
-            db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket.username, function() {
-                io.emit('printThread', this.lastID, name, socket.username); //update everyone's list upon creation of new one    
+            db.run("INSERT INTO threads ('name', 'creator') VALUES (?, ?)", name, socket._name, function() {
+                io.emit('printThread', this.lastID, name, socket._name); //update everyone's list upon creation of new one    
             });
             socket.emit('showSuccess', '', 'You have created a room called ' + name + '.');
         } else {
@@ -62,9 +63,10 @@ module.exports = function(io) {
                     return false;
                 } else {
                     socket.join(id);   
+                    socket._threads.push(id);
                     name = row.name;    
                     db.all('SELECT * FROM messages WHERE thread = ?', id, function(err, messagesRows) {
-                        socket.emit('joinThread', messagesRows, id, name); //display messages to socket upon joining
+                        socket.emit('joinThread', messagesRows, id, name); //display messages to socket upon joining                                             
                     });           
                 } 
             });
@@ -75,7 +77,8 @@ module.exports = function(io) {
     socket.on('leaveThread', function(id) {
         id = validator.toInt(id);
         socket.leave(id);
-        io.in(id).emit('tempMessage', id, null, socket.username); //hide temp message of user if exists
+        socket._threads.splice(socket._threads.indexOf(id), 1);       
+        io.in(id).emit('tempMessage', id, socket._name, null); //hide temp message of user if exists
     });
      
     //on message being sent
@@ -92,12 +95,12 @@ module.exports = function(io) {
                     socket.emit('showError', '', 'This thread no longer exists.');
                     return false;
                 } else {
-                    db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket.username, content, d, function() {
+                    db.run("INSERT INTO messages ('thread', 'sender', 'content', 'date') VALUES (?, ?, ?, ?)", thread, socket._name, content, d, function() {
                         var id = this.lastID
                         db.run("UPDATE threads SET lastActivity = ? WHERE id = ?", d, thread);
-                        db.run("UPDATE threads SET lastSender = ? WHERE id = ?", socket.username, thread);
-                        io.in(thread).emit('message', id, thread, d, socket.username, content);
-                        io.emit('notifyInThreadList', thread, d, socket.username);
+                        db.run("UPDATE threads SET lastSender = ? WHERE id = ?", socket._name, thread);
+                        io.in(thread).emit('message', id, thread, d, socket._name, content);
+                        io.emit('notifyInThreadList', thread, d, socket._name);
                     });
                 }
             });
@@ -105,11 +108,10 @@ module.exports = function(io) {
     });
     
     socket.on('tempMessage', function(thread, content) {
-        var d = new Date().toJSON()
         thread = validator.toInt(thread);
         content = validator.escape(validator.trim(content));
         
-        io.in(thread).emit('tempMessage', thread, socket.username, content);
+        io.in(thread).emit('tempMessage', thread, socket._name, content);
     })
     
     //thread and message editing and deleting
@@ -119,7 +121,7 @@ module.exports = function(io) {
         
         if (validator.isLength(name, 1, 255)) {
             db.get('SELECT creator FROM threads WHERE id = ?', id, function(err, row) {
-                if (row.creator === socket.username) {
+                if (row.creator === socket._name) {
                     db.run("UPDATE threads SET name = ? WHERE id = ?", name, id);
                     socket.emit('showSuccess', 'Thread renamed', 'It is now called ' + name);
                     io.emit('editThread', id, name);
@@ -143,7 +145,7 @@ module.exports = function(io) {
         db.get('SELECT lastActivity FROM threads WHERE id = ?', id, function(err, row) {
             if (row.lastActivity === null) {
                 db.get('SELECT creator FROM threads WHERE id = ?', id, function(err, row) {
-                    if (row.creator === socket.username) {
+                    if (row.creator === socket._name) {
                         db.run("DELETE FROM threads WHERE id = ?", id);
                         socket.emit('showSuccess', 'Thread deleted', 'Rest in peace.');
                         io.emit('deleteThread', id);
@@ -160,8 +162,12 @@ module.exports = function(io) {
     
     //on disconnect of socket    
     socket.on('disconnect', function() {
-        io.emit('userDisconnected', socket.username);
-        console.log(socket.username + ' disconnected');
+        var room = null;
+        while(socket._threads.length > 0) {
+            room = socket._threads.pop();
+            io.in(room).emit('tempMessage', room, socket._name, null);
+        }
+        console.log(socket._name + ' disconnected');
     });  
   });
 }
