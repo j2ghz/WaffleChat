@@ -109,7 +109,7 @@ module.exports = function(io) {
         thread = validator.toInt(thread);
         content = validator.escape(validator.trim(content));
         
-        io.in(thread).emit('tempMessage', thread, d, socket.username, content);
+        io.in(thread).emit('tempMessage', thread, socket.username, content);
     })
     
     //thread and message editing and deleting

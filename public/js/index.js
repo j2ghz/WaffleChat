@@ -2,8 +2,7 @@
 /* global io */
 var socket = io(), myUsername, myThreads, lastDate = [],
     $chatContainer = $('#chatContainer'), $threads = $('#threads'), //caching jquery objects  
-    $thread = [], $threadLi = [],
-    textareaHeight, h3Height;
+    $thread = [], $threadLi = [];
 
 //on document load
 $(document).ready(function() { 
@@ -77,15 +76,8 @@ socket.on('printThread', function(id, name, creator) {
 //after joining and creation of element, print all messages
 socket.on('joinThread', function(messages, id, name) {    
     var threadWindow = ThreadWindow(id, name);    
-    $chatContainer.append(threadWindow); 
-    
-    myThreads.push(id);
-    
-    if (myThreads.length === 1) { //if this is the first window to be created, set boolean to true    
-        textareaHeight = $thread[id].cached.textarea.outerHeight();
-        h3Height = $thread[id].cached.h3.outerHeight();
-    }
-    
+    $chatContainer.append(threadWindow);   
+    myThreads.push(id);    
     $thread[id].cached.messages.text('');
 	messages.forEach(function(message) {
         $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
@@ -115,7 +107,7 @@ socket.on('message', function(id, thread, date, sender, content) {
     }   
 });
 
-socket.on('tempMessage', function(thread, date, sender, content) {
+socket.on('tempMessage', function(thread, sender, content) {
     var temp = $thread[thread].temp;
 
     if ((content === '') || !content) { // if content is empty
@@ -125,7 +117,7 @@ socket.on('tempMessage', function(thread, date, sender, content) {
         }       
     } else {       //if received content
         var wasAtBottom = $thread[thread].cached.messages._isAtBottom(),
-            message = Message(null, thread, date, sender, content); //create new message
+            message = Message(null, thread, null, sender, content); //create new message
         
         if (!temp[sender]) {   //if no temp message in thread from this sender exists        
             temp[sender] = message.appendTo($thread[thread].cached.messages); //append a new one
@@ -226,11 +218,13 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
         html = '';
     html += '<div class="threadName">' + name + '</div><div class="threadFlex">';
     html += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
+    html += '<span class="threadLastActivity">Last message: <span class="value">';
     if (lastSender === null) {
-        html += '<span class="threadLastActivity">Last message: <span class="value"></span> - <span class="value"></span></span>';   
+        html += '</span> - <span class="value">';   
     } else {
-        html += '<span class="threadLastActivity">Last message: <span class="value">' + showDate(lastActivity) + ' ' + showTime(lastActivity) + '</span> - <span class="value">' + lastSender+ '</span></span>';   
+        html += showDate(lastActivity) + ' ' + showTime(lastActivity) + '</span> - <span class="value">' + lastSender; 
     }
+    html += '</span></span>';
     html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div>';
     if (creator === myUsername) {
         html += '<i class="fa fa-pencil editThread"></i>';
@@ -254,7 +248,6 @@ function Message(id, thread, date, sender, content) {
     date = new Date(date);
     var li = $('<li/>').attr('data-id', id),
         d = showDate(date),
-        t = showTime(date),
         html = '';
     if ((lastDate[thread] !== d) && (id !== null)) { //shows date if it's different to the message before and is not a temp message
         lastDate[thread] = d;
@@ -262,13 +255,11 @@ function Message(id, thread, date, sender, content) {
     }
     content = content.replace(/(?:\r\n|\r|\n)/g, '<br />'); //replace \n with <br />
     
-    if (id === null) { //if id of message is null, it is a temporary message not yet in db
-        html += '<div class="messageFlex temp">';   
-    } else {
-        html += '<div class="messageFlex">';    
-    }
-    
-    html += '<span class="messageContent"><span class="messageSender">' + sender + '</span>' + content + '</span><span class="messageTime">' + t + '</span></div>';
+    //if id of message is null, it is a temporary message not yet in db  
+    html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');
+    html += '<span class="messageContent"><span class="messageSender">' + sender + '</span>' + content + '</span><span class="messageTime">';
+    html += (date.getTime() === 0 ? 'typing...' : showTime(date));
+    html += '</span></div>';
     li.html(html);
     li.linkify();
     return li;
