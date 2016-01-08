@@ -160,6 +160,7 @@ module.exports = function(io) {
     
     //on disconnect of socket    
     socket.on('disconnect', function() {
+        io.emit('userDisconnected', socket.username);
         console.log(socket.username + ' disconnected');
     });  
   });

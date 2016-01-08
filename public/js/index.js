@@ -191,6 +191,15 @@ socket.on('showSuccess', function(header, message) {
     }, 250);
 });
 
+socket.on('userDisconnected', function(name) {
+    $thread.forEach(function(thread) {
+        if (thread.temp[name]) {
+            thread.temp[name].remove();
+            thread.temp[name] = undefined;
+        }
+    });
+});
+
 //creates thread window element after joining thread
 function ThreadWindow(id, name) { //creating new element for joining
     var div = $('<div/>', { //create empty div
