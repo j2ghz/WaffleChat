@@ -86,8 +86,6 @@ socket.on('joinThread', function(messages, id, name) {
         h3Height = $thread[id].cached.h3.outerHeight();
     }
     
-    resizeMessages(); //resize elements by window height
-    
     $thread[id].cached.messages.text('');
 	messages.forEach(function(message) {
         $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
@@ -207,11 +205,10 @@ function ThreadWindow(id, name) { //creating new element for joining
         }).attr('data-id', id),
         html = ''; //insert empty list of messages and form into it
     html += '<h3 title="' + name + '"><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
-    html += '<div class="messagesContainer">';
     html += '<ul class="messages"></ul>';
     html += '<form class="messageForm" data-id="' + id + '">';
     html += '<textarea autocomplete="off"></textarea>';
-    html += '</form></div>';
+    html += '</form>';
     div.html(html); //put content inside empty div     
     $thread[id] = div;
     $thread[id].temp = [];
@@ -276,20 +273,6 @@ function Message(id, thread, date, sender, content) {
     li.linkify();
     return li;
 }
-
-//gets called whenever window is resized and upon creation of new thread window
-function resizeMessages() { 
-    var chatHeight = $chatContainer.height();
-    $('.messages').height(chatHeight - h3Height - textareaHeight); //set height of all ul.messages dynamically by container height (which is by 50% of window)
-    $('.threadContainer.collapsed').css('top', chatHeight - h3Height); //move collapsed tab when resizing
-}
-
-//resize ul.messages on window resize
-var resizeTimer;
-$(window).resize(function() { 
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(resizeMessages, 250); //resize throttling
-});
 
 //parses date object into string
 function showDate(date) {
