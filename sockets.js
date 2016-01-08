@@ -75,6 +75,7 @@ module.exports = function(io) {
     socket.on('leaveThread', function(id) {
         id = validator.toInt(id);
         socket.leave(id);
+        io.in(id).emit('tempMessage', id, null, socket.username); //hide temp message of user if exists
     });
      
     //on message being sent
@@ -102,6 +103,14 @@ module.exports = function(io) {
             });
         }
     });
+    
+    socket.on('tempMessage', function(thread, content) {
+        var d = new Date().toJSON()
+        thread = validator.toInt(thread);
+        content = validator.escape(validator.trim(content));
+        
+        io.in(thread).emit('tempMessage', thread, d, socket.username, content);
+    })
     
     //thread and message editing and deleting
     socket.on('editThread', function(id, name) {

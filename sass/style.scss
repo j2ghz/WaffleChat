@@ -135,10 +135,11 @@ h2{
         }    
     
         .threadFlex {
-            display:flex;      
+            display:flex;   
+               
             span{
                 flex-basis:0px;
-            }        
+            }      
         }
         
         .threadCreator{
@@ -256,6 +257,10 @@ h2{
         display:flex;
         max-width:100%;
         margin-bottom:5px;
+                      
+        &.temp{
+            opacity:0.3;
+        }  
     }
     
     .messageSender {
