@@ -27,7 +27,6 @@
             form:$('form', this),
             textarea:$('textarea', this),
             close:$('i.close', this),
-            messagesContainer:$('.messagesContainer', this),
             h3:$('h3', this),
             notification:$('i.notification', this),
             messages:$('.messages', this)
@@ -57,12 +56,6 @@
     $.fn._collapse = function() {
         var id = this.data('id');
         this.toggleClass('collapsed'); //different display of header
-        
-        if (this.hasClass('collapsed') === true) {
-            this.css('top', this.cached.messagesContainer.height());    
-        } else {
-            this.css('top', 0);  
-        }
         
         if (this.hasClass('collapsed') === false && this.cached.notification.hasClass('fa-comment') === true) { //if notification is up and you uncollapse it
             this._scrollToLastMessage(true); //scroll down and remove notification
