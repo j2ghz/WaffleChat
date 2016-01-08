@@ -1,3 +1,4 @@
+/* global $thread */
 /* global swal */
 /* global myThreads */
 /* global socket */
@@ -39,6 +40,7 @@
         socket.emit('leaveThread', id);
         myThreads.splice(myThreads.indexOf(id), 1);
         this.remove();
+        $thread[id] = undefined;
         return this;
     }
     
@@ -79,7 +81,8 @@
     
     $.fn._makeSubmittable = function() {
         var textarea = this.cached.textarea,
-            id = this.data('id');
+            id = this.data('id'),
+            messageTimer;
         
         this.cached.form.submit(function (){
             if (textarea.val() !== '') { //if not empty
@@ -87,8 +90,8 @@
                 textarea.val(''); //set input value back to nothing
             }
             return false;
-        });       
-        
+        });   
+            
         textarea.keydown(function(e) {
             if (e.keyCode == 13) {
                 e.preventDefault();
@@ -99,8 +102,15 @@
                     var s = $(this).val();
                     $(this).val(s + "\n");
                 }       
-            }
+            }           
         });
+        
+        textarea.on('input', function(e) {
+            clearTimeout(messageTimer);
+            messageTimer = setTimeout(function() {
+                socket.emit('tempMessage', id, textarea.val());
+            }, 100);
+        })
         return this;
     }
     

@@ -75,7 +75,7 @@ socket.on('printThread', function(id, name, creator) {
 });
 
 //after joining and creation of element, print all messages
-socket.on('joinThread', function(messages, id, name) {
+socket.on('joinThread', function(messages, id, name) {    
     var threadWindow = ThreadWindow(id, name);    
     $chatContainer.append(threadWindow); 
     
@@ -96,18 +96,49 @@ socket.on('joinThread', function(messages, id, name) {
 });
 
 //on receiving a message
-socket.on('message', function(id, thread, date, sender, content) {
-    var wasAtBottom = $thread[thread].cached.messages._isAtBottom(); //needs to be determined before appending the new message
-  
+socket.on('message', function(id, thread, date, sender, content) {   
+    var wasAtBottom = $thread[thread].cached.messages._isAtBottom(), //needs to be determined before appending the new message
+        temp = $thread[thread].temp;
+    
     if (myUsername !== sender) { //if someone else sends it, notify
         $thread[thread]._notifyOfNewMessage();   
     }  
+    
+    if (temp[sender]) { //if a temporary message exists, remove it
+        temp[sender].remove();
+        temp[sender] = undefined;   
+    }
+
 	$thread[thread].cached.messages.append(
         Message(id, thread, date, sender, content)
     );   
     if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
         $thread[thread]._scrollToLastMessage(true);
     }   
+});
+
+socket.on('tempMessage', function(thread, date, sender, content) {
+    var temp = $thread[thread].temp;
+
+    if ((content === '') || !content) { // if content is empty
+        if (temp[sender]) { //remove if exists
+            temp[sender].remove();
+            temp[sender] = undefined;    
+        }       
+    } else {       //if received content
+        var wasAtBottom = $thread[thread].cached.messages._isAtBottom(),
+            message = Message(null, thread, date, sender, content); //create new message
+        
+        if (!temp[sender]) {   //if no temp message in thread from this sender exists        
+            temp[sender] = message.appendTo($thread[thread].cached.messages); //append a new one
+        } else {
+            temp[sender].html(message.html()); //otherwise replace html
+        }
+        
+        if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
+            $thread[thread]._scrollToLastMessage(true);
+        }  
+    }
 });
 
 //when not joined in a thread, increment 'new messages since load' and change Last message date and sender
@@ -166,7 +197,7 @@ function ThreadWindow(id, name) { //creating new element for joining
             class: 'threadContainer',
         }).attr('data-id', id),
         html = ''; //insert empty list of messages and form into it
-    html += '<h3><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
+    html += '<h3 title="' + name + '"><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
     html += '<div class="messagesContainer">';
     html += '<ul class="messages"></ul>';
     html += '<form class="messageForm" data-id="' + id + '">';
@@ -174,6 +205,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     html += '</form></div>';
     div.html(html); //put content inside empty div     
     $thread[id] = div;
+    $thread[id].temp = [];
     div._cacheThread();  
     div._makeCollapsible(); //collapsing behaviour
     div._makeClosable();
@@ -218,12 +250,18 @@ function Message(id, thread, date, sender, content) {
         d = showDate(date),
         t = showTime(date),
         html = '';
-    if (lastDate[thread] !== d) { //shows date if it's different to the message before
+    if ((lastDate[thread] !== d) && (id !== null)) { //shows date if it's different to the message before and is not a temp message
         lastDate[thread] = d;
         html += '<div class="messageDate">' + d + '</div>';   
     }
     content = content.replace(/(?:\r\n|\r|\n)/g, '<br />'); //replace \n with <br />
-    html += '<div class="messageFlex">';
+    
+    if (id === null) { //if id of message is null, it is a temporary message not yet in db
+        html += '<div class="messageFlex temp">';   
+    } else {
+        html += '<div class="messageFlex">';    
+    }
+    
     html += '<span class="messageContent"><span class="messageSender">' + sender + '</span>' + content + '</span><span class="messageTime">' + t + '</span></div>';
     li.html(html);
     li.linkify();
