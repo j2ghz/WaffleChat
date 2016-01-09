@@ -1,11 +1,14 @@
 /* global swal */
 /* global io */
-var socket = io(), myUsername, myThreads, lastDate = [],
-    $chatContainer = $('#chatContainer'), $threads = $('#threads'), //caching jquery objects  
-    $thread = [], $threadLi = [];
-
+var socket = io(), myUsername, myThreads, $chatContainer, $threads, $threadLi, $thread;
+  
 //on document load
 $(document).ready(function() { 
+    $chatContainer = $('#chatContainer');
+    $threads = $('#threads');
+    $threadLi = [];
+    $thread = [];
+       
     $('#createThread').click(function() {
         swal({
             title:'Enter a name',
@@ -250,41 +253,44 @@ function ThreadWindow(id, name) { //creating new element for joining
 }
 
 //creates new message element upon socket joining thread
-function Message(id, thread, date, sender, content) {
-    date = new Date(date);
-    var li = $('<li/>').attr('data-id', id),
-        d = showDate(date),
-        html = '';
+var Message = (function() {
+    var lastDate = [];
+    return function(id, thread, date, sender, content) {
+        date = new Date(date);
+        var li = $('<li/>').attr('data-id', id),
+            d = showDate(date),
+            html = '';
+            
+        if ((lastDate[thread] !== d) && (id !== null)) { //shows date if it's different to the message before and is not a temp message
+            lastDate[thread] = d;
+            html += '<div class="messageDate">' + d + '</div>';   
+        }
         
-    if ((lastDate[thread] !== d) && (id !== null)) { //shows date if it's different to the message before and is not a temp message
-        lastDate[thread] = d;
-        html += '<div class="messageDate">' + d + '</div>';   
-    }
-    
-    if (content) { //replace \n with <br />
-        content = content.replace(/(?:\r\n|\r|\n)/g, '<br />');
-    } 
+        if (content) { //replace \n with <br />
+            content = content.replace(/(?:\r\n|\r|\n)/g, '<br />');
+        } 
 
-    html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //if id of message is null, it is a temporary message not yet in db  
-    html += '<span class="messageContainer"><span class="messageSender">' + sender + '</span>';
-    html += (content === null ? '<span class="deleted messageContent">deleted' : '<span class="messageContent">' + content); //if content is null, it is a deleted message
-    html += '</span></span><span class="messageTime">';
-    if (id === null) { //if id is null, message is temp and it is still being typed
-        html += 'typing...';
-    } else {
-       if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
-           html += '<i class="fa fa-trash-o deleteMessage"></i>';
-       }
-       html += showTime(date)
+        html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //if id of message is null, it is a temporary message not yet in db  
+        html += '<span class="messageContainer"><span class="messageSender">' + sender + '</span>';
+        html += (content === null ? '<span class="deleted messageContent">deleted' : '<span class="messageContent">' + content); //if content is null, it is a deleted message
+        html += '</span></span><span class="messageTime">';
+        if (id === null) { //if id is null, message is temp and it is still being typed
+            html += 'typing...';
+        } else {
+        if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
+            html += '<i class="fa fa-trash-o deleteMessage"></i>';
+        }
+        html += showTime(date)
+        }
+        html += '</span></div>';
+        li.html(html);
+        $thread[thread].message[id] = li;
+        li._cacheMessage();
+        li._makeMessageDeletable();
+        li.linkify();
+        return li;        
     }
-    html += '</span></div>';
-    li.html(html);
-    $thread[thread].message[id] = li;
-    li._cacheMessage();
-    li._makeMessageDeletable();
-    li.linkify();
-    return li;
-}
+})();
 
 //parses date object into string
 function showDate(date) {
