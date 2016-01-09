@@ -278,6 +278,12 @@ h2{
         &.temp{
             opacity:0.4;
         }  
+        
+        &:hover{
+            .deleteMessage{
+                opacity:1;  
+            }          
+        }
     }
     
     .messageSender {
@@ -287,21 +293,34 @@ h2{
         white-space:nowrap;
     }
     
-    .messageContent{
+    .messageContainer{
         flex-grow:1;
         word-wrap:break-word;
         min-width:0;
+        
+        .deleted{
+            opacity:0.5;
+            font-style:italic;
+        }
     }
     
     .messageTime{
         margin-left:5px;
         font-size:0.8em;
+        flex-shrink:0;
     }
     
     .messageDate{
         text-align:center;
         font-size:0.8em;
         padding:5px;
+    }
+    
+    .deleteMessage{
+        font-size:1.5em;
+        opacity:0;
+        transition:opacity 0.1s;
+        cursor:pointer;
     }
     
     form.messageForm{
