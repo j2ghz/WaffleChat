@@ -31,23 +31,29 @@ $(document).ready(function() {
     
     $('#collapseAllThreads').click(function() {
         $thread.forEach(function(obj) {
-            if(obj.hasClass('collapsed') === false) {
-                obj._collapse();
+            if (obj) {
+                if(obj.hasClass('collapsed') === false) {
+                    obj._collapse();
+                }  
             }
         });
     });
     
     $('#uncollapseAllThreads').click(function() {
         $thread.forEach(function(obj) {
-            if(obj.hasClass('collapsed') === true) {
-                obj._collapse();
+            if (obj) {
+                if (obj.hasClass('collapsed') === true) {
+                    obj._collapse();
+                }
             }
         });
     });
     
     $('#closeAllThreads').click(function() {
         $thread.forEach(function(obj) {
-            obj._close();
+            if (obj) { 
+                obj._close();
+            }            
         });
     });
 });
