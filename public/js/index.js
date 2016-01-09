@@ -265,10 +265,6 @@ var Message = (function() {
             lastDate[thread] = d;
             html += '<div class="messageDate">' + d + '</div>';   
         }
-        
-        if (content) { //replace \n with <br />
-            content = content.replace(/(?:\r\n|\r|\n)/g, '<br />');
-        } 
 
         html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //if id of message is null, it is a temporary message not yet in db  
         html += '<span class="messageContainer"><span class="messageSender">' + sender + '</span>';
