@@ -89,6 +89,7 @@ socket.on('joinThread', function(messages, id, name) {
         $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
 	});   
     $thread[id]._scrollToLastMessage(false);
+    $thread[id].cached.textarea.focus();
 });
 
 //on receiving a message
@@ -187,27 +188,6 @@ socket.on('showSuccess', function(header, message) {
     }, 250);
 });
 
-//creates thread window element after joining thread
-function ThreadWindow(id, name) { //creating new element for joining
-    var div = $('<div/>', { //create empty div
-            class: 'threadContainer',
-        }).attr('data-id', id),
-        html = ''; //insert empty list of messages and form into it
-    html += '<h3 title="' + name + '"><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
-    html += '<ul class="messages"></ul>';
-    html += '<form class="messageForm" data-id="' + id + '">';
-    html += '<textarea autocomplete="off"></textarea>';
-    html += '</form>';
-    div.html(html); //put content inside empty div     
-    $thread[id] = div;
-    $thread[id].temp = [];
-    div._cacheThread();  
-    div._makeCollapsible(); //collapsing behaviour
-    div._makeClosable();
-    div._makeSubmittable();
-    return div;
-}
-
 //creates thread list item element after connection or upon creation of new thread
 function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     lastActivity = new Date(lastActivity);
@@ -238,6 +218,27 @@ function ThreadListItem(id, name, creator, lastActivity, lastSender) {
         li._makeThreadDeletable();
     }
     return li;
+}
+
+//creates thread window element after joining thread
+function ThreadWindow(id, name) { //creating new element for joining
+    var div = $('<div/>', { //create empty div
+            class: 'threadContainer',
+        }).attr('data-id', id),
+        html = ''; //insert empty list of messages and form into it
+    html += '<h3 title="' + name + '"><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
+    html += '<ul class="messages"></ul>';
+    html += '<form class="messageForm" data-id="' + id + '">';
+    html += '<textarea autocomplete="off" placeholder="Enter your message here."></textarea>';
+    html += '</form>';
+    div.html(html); //put content inside empty div     
+    $thread[id] = div;
+    $thread[id].temp = [];
+    div._cacheThread();  
+    div._makeCollapsible(); //collapsing behaviour
+    div._makeClosable();
+    div._makeSubmittable();
+    return div;
 }
 
 //creates new message element upon socket joining thread
