@@ -374,9 +374,13 @@ h2{
             margin-bottom:5px;
             
             li{
-                margin:0 5px;
+                margin:0px 5px 0px 0px;
                 flex-grow:1;
                 text-align:center;
+                
+                &:first-child{
+                    margin-left:5px;
+                }
             }
         }
     }
