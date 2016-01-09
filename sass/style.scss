@@ -1,5 +1,5 @@
 $darker-orange:#d61;
-$dark-orange:#f82;
+$dark-orange:#f81;
 $light-orange:#f93;
 
 body{
@@ -59,11 +59,16 @@ h2{
     background-color:$light-orange; 
     color:#fff;
     padding:0px;
-    box-shadow:0px 20px 70px -20px #000;
+    box-shadow:0px 10px 60px -20px #000;
     
     h1, h2{
         color:#fff;
         margin:1em;
+    }
+    
+    h2{
+        margin-top:0px;
+        font-size:1.2em;
     }
     
     a{
@@ -80,7 +85,21 @@ h2{
         flex-direction:column;
         
         li{
+            cursor:pointer;
             padding:15px;
+            margin:5px 0px;
+            background-color:$dark-orange;
+            transition: color 0.2s, background-color 0.2s;
+            
+            &:hover{
+                background-color:white;
+                color:$dark-orange;
+                
+                a{
+                    transition: color 0.2s;
+                    color:$dark-orange;
+                }
+            }
         }
     }
 }
@@ -93,7 +112,7 @@ h2{
 
 #threadsContainer, .genericContainer, .genericHeaderContainer{
     overflow:auto;
-    box-shadow:0px 20px 70px -20px #000;
+    box-shadow:0px 15px 50px -20px #000;
     padding:2em;
 }
 
@@ -345,10 +364,17 @@ h2{
         width:100%;
         z-index:1;
         
+        h1, h2{
+            display:inline-block;
+        }
+        
         #headerFunctions{
             flex-direction:row;
+            margin:0px;
+            margin-bottom:5px;
             
             li{
+                margin:0 5px;
                 flex-grow:1;
                 text-align:center;
             }
@@ -356,7 +382,7 @@ h2{
     }
     
     #threadsContainer{
-        margin-top:250px;
+        margin-top:200px;
     }
     
     body{
