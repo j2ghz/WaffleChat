@@ -112,7 +112,26 @@ module.exports = function(io) {
         content = validator.escape(validator.trim(content));
         
         io.in(thread).emit('tempMessage', thread, socket._name, content);
-    })
+    });
+    
+    socket.on('deleteMessage', function(id) {
+        id = validator.toInt(id);
+        db.get('SELECT sender, thread FROM messages WHERE id = ?', id, function(err, row) {   
+            if (!row) {
+                socket.emit('showError', '', 'This message no longer exists.');
+                return false;
+            } else {
+                if (row.sender === socket._name) {
+                    db.run("UPDATE messages SET content = ? WHERE id = ?", null, id);
+                    socket.emit('showSuccess', 'Message deleted', 'Rest in peace.');
+                    io.in(row.thread).emit('deleteMessage', id, row.thread);
+                } else {
+                    socket.emit('showError', '', 'You can only delete your own messages.');
+                    return false;
+                }
+            }
+        });
+    });
     
     //thread and message editing and deleting
     socket.on('editThread', function(id, name) {

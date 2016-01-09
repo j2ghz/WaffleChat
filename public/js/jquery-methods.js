@@ -34,6 +34,14 @@
         return this;
     }
     
+    $.fn._cacheMessage = function() {
+        this.cached = {
+            content:$('.messageContent', this),
+            deleteMessage:$('.deleteMessage', this)
+        }
+        return this;
+    }
+    
     $.fn._close = function() {
         var id = this.data('id');
         socket.emit('leaveThread', id);
@@ -105,6 +113,26 @@
             }, 100);
         })
         return this;
+    }
+    
+    $.fn._makeMessageDeletable = function() {
+        var id = this.data('id');
+        $('.deleteMessage', this).click(function(e) {
+            swal({
+                type:'warning',
+                title:'Delete the message?',
+                text:'This action is irreversible.',
+                showCancelButton:true,
+                confirmButtonText:'Delete',
+                closeOnConfirm:false,
+                showLoaderOnConfirm:true,
+                allowOutsideClick:true
+            }, function(isConfirm) {
+                if (isConfirm) {
+                    socket.emit('deleteMessage', id);
+                }         
+            });
+        });
     }
     
     $.fn._hideNotification = function() {
@@ -200,6 +228,7 @@
                 showCancelButton:true,
                 confirmButtonText:'Change name',
                 closeOnConfirm:false,
+                showLoaderOnConfirm:true,
                 allowOutsideClick:true
             }, function(inputValue) {
                 if (inputValue === false) return false;
@@ -225,7 +254,8 @@
                 text:'This action is irreversible.',
                 showCancelButton:true,
                 confirmButtonText:'Delete',
-                closeOnConfirm:true,
+                closeOnConfirm:false,
+                showLoaderOnConfirm:true,
                 allowOutsideClick:true
             }, function(isConfirm) {
                 if (isConfirm) {

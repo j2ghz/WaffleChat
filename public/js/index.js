@@ -166,6 +166,13 @@ socket.on('deleteThread', function(id) {
     }
 });
 
+socket.on('deleteMessage', function(id, thread) {
+    var message = $thread[thread].message[id].cached  
+    message.content.addClass('deleted');
+    message.content.text('deleted');
+    message.deleteMessage.remove();
+});
+
 socket.on('showError', function(header, message) {
     setTimeout(function() {
         swal({
@@ -234,6 +241,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     div.html(html); //put content inside empty div     
     $thread[id] = div;
     $thread[id].temp = [];
+    $thread[id].message = [];
     div._cacheThread();  
     div._makeCollapsible(); //collapsing behaviour
     div._makeClosable();
@@ -247,18 +255,33 @@ function Message(id, thread, date, sender, content) {
     var li = $('<li/>').attr('data-id', id),
         d = showDate(date),
         html = '';
+        
     if ((lastDate[thread] !== d) && (id !== null)) { //shows date if it's different to the message before and is not a temp message
         lastDate[thread] = d;
         html += '<div class="messageDate">' + d + '</div>';   
     }
-    content = content.replace(/(?:\r\n|\r|\n)/g, '<br />'); //replace \n with <br />
     
-    //if id of message is null, it is a temporary message not yet in db  
-    html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');
-    html += '<span class="messageContent"><span class="messageSender">' + sender + '</span>' + content + '</span><span class="messageTime">';
-    html += (date.getTime() === 0 ? 'typing...' : showTime(date));
+    if (content) { //replace \n with <br />
+        content = content.replace(/(?:\r\n|\r|\n)/g, '<br />');
+    } 
+
+    html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //if id of message is null, it is a temporary message not yet in db  
+    html += '<span class="messageContainer"><span class="messageSender">' + sender + '</span>';
+    html += (content === null ? '<span class="deleted messageContent">deleted' : '<span class="messageContent">' + content); //if content is null, it is a deleted message
+    html += '</span></span><span class="messageTime">';
+    if (id === null) { //if id is null, message is temp and it is still being typed
+        html += 'typing...';
+    } else {
+       if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
+           html += '<i class="fa fa-trash-o deleteMessage"></i>';
+       }
+       html += showTime(date)
+    }
     html += '</span></div>';
     li.html(html);
+    $thread[thread].message[id] = li;
+    li._cacheMessage();
+    li._makeMessageDeletable();
     li.linkify();
     return li;
 }
