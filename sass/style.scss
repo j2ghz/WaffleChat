@@ -280,7 +280,7 @@ h2{
         }  
         
         &:hover{
-            .deleteMessage{
+            .deleteMessage, .editMessage{
                 opacity:1;  
             }          
         }
@@ -321,15 +321,23 @@ h2{
         padding:5px;
     }
     
-    .deleteMessage{
+    .deleteMessage, .editMessage{
         font-size:1.5em;
         opacity:0;
         transition:opacity 0.2s;
         cursor:pointer;
         position:absolute;
-        right:0px;
         background-color:white;
-        padding-left:calc(100% - 12px);
+        width:50%;
+        text-align:center;
+    }
+    
+    .deleteMessage{
+        left:0px;   
+    }
+    
+    .editMessage{
+        right:0px;
     }
     
     form.messageForm{

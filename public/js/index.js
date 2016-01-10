@@ -170,10 +170,24 @@ socket.on('deleteThread', function(id) {
 });
 
 socket.on('deleteMessage', function(id, thread) {
-    var message = $thread[thread].message[id].cached  
-    message.content.addClass('deleted');
-    message.content.text('deleted');
-    message.deleteMessage.remove();
+    var message = $thread[thread].message[id].cached;
+    if (message) {
+        message.content.addClass('deleted');
+        message.content.text('deleted');
+        message.deleteMessage.remove();  
+        message.editMessage.remove(); 
+    }
+});
+
+socket.on('editMessage', function(id, thread, content) {
+    var wasAtBottom = $thread[thread].cached.messages._isAtBottom(), message = $thread[thread].message[id].cached;
+    if (message) {
+        message.content.removeClass('deleted');
+        message.content.html(content);   
+        if (wasAtBottom === true) {
+            $thread[thread]._scrollToLastMessage(true);    
+        }        
+    }  
 });
 
 socket.on('showError', function(header, message) {
@@ -273,16 +287,18 @@ var Message = (function() {
         if (id === null) { //if id is null, message is temp and it is still being typed
             html += 'typing...';
         } else {
-        if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
-            html += '<i class="fa fa-trash-o deleteMessage"></i>';
-        }
-        html += showTime(date)
+            if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
+                html += '<i class="fa fa-trash-o deleteMessage"></i>';
+                html += '<i class="fa fa-pencil editMessage"></i>';
+            }
+            html += showTime(date)
         }
         html += '</span></div>';
         li.html(html);
         $thread[thread].message[id] = li;
         li._cacheMessage();
         li._makeMessageDeletable();
+        li._makeMessageEditable();
         li.linkify();
         return li;        
     }
