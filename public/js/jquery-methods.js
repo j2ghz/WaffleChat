@@ -37,7 +37,8 @@
     $.fn._cacheMessage = function() {
         this.cached = {
             content:$('.messageContent', this),
-            deleteMessage:$('.deleteMessage', this)
+            deleteMessage:$('.deleteMessage', this),
+            editMessage:$('.editMessage', this)
         }
         return this;
     }
@@ -117,7 +118,7 @@
     
     $.fn._makeMessageDeletable = function() {
         var id = this.data('id');
-        $('.deleteMessage', this).click(function(e) {
+        this.cached.deleteMessage.click(function(e) {
             swal({
                 type:'warning',
                 title:'Delete the message?',
@@ -131,6 +132,26 @@
                 if (isConfirm) {
                     socket.emit('deleteMessage', id);
                 }         
+            });
+        });
+    }
+    
+    $.fn._makeMessageEditable = function() {
+        var _this = this, id = this.data('id');       
+        this.cached.editMessage.click(function(e) {
+            var content = _this.cached.content;
+            content.attr('contenteditable', 'true');  
+            content.focus(); 
+            
+            content.keydown(function(e) {
+                if ((e.keyCode == 13) && (e.shiftKey === false)) {
+                    e.preventDefault();  
+                    content.attr('contenteditable', 'false'); 
+                    socket.emit('editMessage', id, content.html());
+                }
+                if (e.keyCode == 27) {
+                    content.attr('contenteditable', 'false'); 
+                }           
             });
         });
     }

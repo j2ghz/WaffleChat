@@ -133,6 +133,33 @@ module.exports = function(io) {
         });
     });
     
+    socket.on('editMessage', function(id, content) {
+       id = validator.toInt(id);
+       content = validator.escape(validator.trim(content)); 
+       console.log(content === '');
+       db.get('SELECT sender, thread FROM messages WHERE id = ?', id, function(err, row) { 
+            if (!row) {
+                socket.emit('showError', '', 'This message no longer exists.');
+                return false;
+            } else {
+                if (row.sender === socket._name) {
+                    if (!content || (content === '')) {
+                        db.run("UPDATE messages SET content = ? WHERE id = ?", null, id);
+                        socket.emit('showSuccess', 'Message deleted', 'Rest in peace.');
+                        io.in(row.thread).emit('deleteMessage', id, row.thread);
+                    } else {
+                        db.run("UPDATE messages SET content = ? WHERE id = ?", content, id);
+                        socket.emit('showSuccess', 'Message edited', content);
+                        io.in(row.thread).emit('editMessage', id, row.thread, content);
+                    }
+                } else {
+                    socket.emit('showError', '', 'You can only edit your own messages.');
+                    return false;
+                }
+            }
+       });
+    });
+    
     //thread and message editing and deleting
     socket.on('editThread', function(id, name) {
         id = validator.toInt(id);
