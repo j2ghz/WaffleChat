@@ -136,7 +136,7 @@ module.exports = function(io) {
     socket.on('editMessage', function(id, content) {
        id = validator.toInt(id);
        content = validator.escape(validator.trim(content)); 
-       console.log(content === '');
+       
        db.get('SELECT sender, thread FROM messages WHERE id = ?', id, function(err, row) { 
             if (!row) {
                 socket.emit('showError', '', 'This message no longer exists.');
