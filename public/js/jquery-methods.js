@@ -1,6 +1,5 @@
 /* global $thread */
 /* global swal */
-/* global myThreads */
 /* global socket */
 (function($) { 
 // --- MISC ---
@@ -46,7 +45,6 @@
     $.fn._close = function() {
         var id = this.data('id');
         socket.emit('leaveThread', id);
-        myThreads.splice(myThreads.indexOf(id), 1);
         this.remove();
         $thread[id] = undefined;
         return this;
@@ -229,7 +227,7 @@
         this.click(function(e) { //when you click on thread, join it
             if (e.target.classList[0] !== 'fa') { //if not clicked on icon
                 e.preventDefault();
-                if (myThreads.indexOf(id) === -1) { //if not already joined, join
+                if (!$thread[id]) { //if not already joined, join
                     socket.emit('joinThread', id); 
                 } else {
                     $thread[id]._collapse();

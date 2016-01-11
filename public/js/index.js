@@ -1,6 +1,6 @@
 /* global swal */
 /* global io */
-var socket = io(), myUsername, myThreads, $chatContainer, $threads, $threadLi, $thread;
+var socket = io(), myUsername, $chatContainer, $threads, $threadLi, $thread;
   
 //on document load
 $(document).ready(function() { 
@@ -62,7 +62,6 @@ $(document).ready(function() {
 });
 
 socket.on('setUsername', function(name) {
-    myThreads = [];
     myUsername = name;
 });
 
@@ -85,8 +84,7 @@ socket.on('printThread', function(id, name, creator) {
 //after joining and creation of element, print all messages
 socket.on('joinThread', function(messages, id, name) {    
     var threadWindow = ThreadWindow(id, name);    
-    $chatContainer.append(threadWindow);   
-    myThreads.push(id);    
+    $chatContainer.append(threadWindow);      
     $thread[id].cached.messages.text('');
 	messages.forEach(function(message) {
         $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
@@ -157,14 +155,14 @@ socket.on('notifyInThreadList', function(thread, date, sender) {
 
 socket.on('editThread', function(id, name) {
     $('.threadName', $threadLi[id]).html(name);
-    if (myThreads.indexOf(id) !== -1) {
+    if ($thread[id]) {
         $('.threadHeaderName', $thread[id].cached.h3).html(name);
     }
 });
 
 socket.on('deleteThread', function(id) {
     $threadLi[id].remove();
-    if (myThreads.indexOf(id) !== -1) {
+    if ($thread[id]) {
         $thread[id]._close();
     }
 });
@@ -259,6 +257,7 @@ function ThreadWindow(id, name) { //creating new element for joining
     $thread[id] = div;
     $thread[id].temp = [];
     $thread[id].message = [];
+    $thread[id].lastDate = null;
     div._cacheThread();  
     div._makeCollapsible(); //collapsing behaviour
     div._makeClosable();
@@ -267,42 +266,39 @@ function ThreadWindow(id, name) { //creating new element for joining
 }
 
 //creates new message element upon socket joining thread
-var Message = (function() {
-    var lastDate = [];
-    return function(id, thread, date, sender, content) {
-        date = new Date(date);
-        var li = $('<li/>').attr('data-id', id),
-            d = showDate(date),
-            html = '';
-            
-        if ((lastDate[thread] !== d) && (id !== null)) { //shows date if it's different to the message before and is not a temp message
-            lastDate[thread] = d;
-            html += '<div class="messageDate">' + d + '</div>';   
-        }
-
-        html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //if id of message is null, it is a temporary message not yet in db  
-        html += '<span class="messageContainer"><span class="messageSender">' + sender + '</span>';
-        html += (content === null ? '<span class="deleted messageContent">deleted' : '<span class="messageContent">' + content); //if content is null, it is a deleted message
-        html += '</span></span><span class="messageTime">';
-        if (id === null) { //if id is null, message is temp and it is still being typed
-            html += 'typing...';
-        } else {
-            if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
-                html += '<i class="fa fa-trash-o deleteMessage"></i>';
-                html += '<i class="fa fa-pencil editMessage"></i>';
-            }
-            html += showTime(date)
-        }
-        html += '</span></div>';
-        li.html(html);
-        $thread[thread].message[id] = li;
-        li._cacheMessage();
-        li._makeMessageDeletable();
-        li._makeMessageEditable();
-        li.linkify();
-        return li;        
+function Message(id, thread, date, sender, content) {
+    date = new Date(date);
+    var li = $('<li/>').attr('data-id', id),
+        d = showDate(date),
+        html = '';
+        
+    if (($thread[thread].lastDate !== d) && (id !== null)) { //shows date if it's different to the message before and is not a temp message
+        $thread[thread].lastDate = d;
+        html += '<div class="messageDate">' + d + '</div>';   
     }
-})();
+
+    html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //if id of message is null, it is a temporary message not yet in db  
+    html += '<span class="messageContainer"><span class="messageSender">' + sender + '</span>';
+    html += (content === null ? '<span class="deleted messageContent">deleted' : '<span class="messageContent">' + content); //if content is null, it is a deleted message
+    html += '</span></span><span class="messageTime">';
+    if (id === null) { //if id is null, message is temp and it is still being typed
+        html += 'typing...';
+    } else {
+        if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
+            html += '<i class="fa fa-trash-o deleteMessage"></i>';
+            html += '<i class="fa fa-pencil editMessage"></i>';
+        }
+        html += showTime(date)
+    }
+    html += '</span></div>';
+    li.html(html);
+    $thread[thread].message[id] = li;
+    li._cacheMessage();
+    li._makeMessageDeletable();
+    li._makeMessageEditable();
+    li.linkify();
+    return li;        
+}
 
 //parses date object into string
 function showDate(date) {
