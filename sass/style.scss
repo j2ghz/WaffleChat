@@ -1,5 +1,5 @@
-$darker-orange:#d61;
-$dark-orange:#f81;
+$darker-orange:#d60;
+$dark-orange:#f80;
 $light-orange:#f90;
 
 body{
@@ -38,10 +38,32 @@ h2{
     display:block;
     max-width:992px;
     background-color:$light-orange;
+    font-size:1.8em;
     
     h1{
         color:#fff;
-        margin:1em;
+        margin:0em;
+    }
+}
+
+.loginContainer{
+    display:flex;
+    
+    form{
+        flex-grow:1;
+        flex-basis:0px;
+        text-align:center;
+        
+        input{
+            margin:10px;
+            width:80%;
+        }
+        
+        button{
+            margin:10px;
+            width:50%;
+            height:30px;
+        }
     }
 }
 
