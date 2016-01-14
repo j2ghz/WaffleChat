@@ -54,15 +54,22 @@ h2{
         flex-basis:0px;
         text-align:center;
         
+        &:first-child{
+            border-right:1px solid #ddd;
+        }
+        
         input{
-            margin:10px;
+            margin:5px;
             width:80%;
+            height:1.5em;
+            padding:5px;
         }
         
         button{
             margin:10px;
             width:50%;
-            height:30px;
+            height:2em;
+            font-size:1.5em;
         }
     }
 }
