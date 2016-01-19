@@ -93,15 +93,10 @@
         });   
             
         textarea.keydown(function(e) {
-            if (e.keyCode == 13) {
-                e.preventDefault();
-                if (e.shiftKey === false) {
-                    $(this.form).submit()
-                    return false;   
-                } else {
-                    var s = $(this).val();
-                    $(this).val(s + "\n");
-                }       
+            if ((e.keyCode == 13) && (e.shiftKey === false)) { //if user not holding shift, submit
+                e.preventDefault();  
+                $(this.form).submit(); //submits the form
+                return false;   
             }           
         });
         
