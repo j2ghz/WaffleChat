@@ -57,7 +57,7 @@ module.exports = function(io) {
         var name = null;
         id = validator.toInt(id);
         
-        if (socket.rooms.indexOf(id) === -1) {   //pokud ještě ve threadu není
+        if (socket._threads.indexOf(id) === -1) {  //pokud ještě ve threadu není
             db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) { //najde se jméno threadu
                 if(!row){
                     socket.emit('showError', '', 'Tento thread již neexistuje.');
@@ -213,10 +213,10 @@ module.exports = function(io) {
     
     //při odpojení socketu
     socket.on('disconnect', function() {
-        var room = null;
+        var thread = null;
         while(socket._threads.length > 0) {
-            room = socket._threads.pop();
-            io.in(room).emit('tempMessage', room, socket._name, null); //smažou se veškeré dočasné zprávy od uživatele
+            thread = socket._threads.pop();
+            io.in(thread).emit('tempMessage', thread, socket._name, null); //smažou se veškeré dočasné zprávy od uživatele
         }
         console.log(socket._name + ' disconnected');
     });  
