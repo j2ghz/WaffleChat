@@ -12,13 +12,13 @@ module.exports = function(username, password, next) {
                 db.run("INSERT INTO users ('username', 'password', 'salt') VALUES (?, ?, ?)", username, hashPassword(password, salt), salt);
                 next();  
             } else {
-                var error = new Error('Username already taken');
+                var error = new Error('Toto jméno používá jiný uživatel.');
                 error.status = 422;
                 next(error);
             }
         });  
     } else {
-        var error = new Error('Username must be between 2 and 16 characters long.');
+        var error = new Error('Uživatelské jméno musí být 2 až 16 znaků dlouhé.');
         error.status = 422;
         next(error);
     }
