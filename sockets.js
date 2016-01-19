@@ -149,7 +149,7 @@ module.exports = function(io) {
                         io.in(row.thread).emit('deleteMessage', id, row.thread);
                     } else {
                         db.run("UPDATE messages SET content = ? WHERE id = ?", content, id);
-                        socket.emit('showSuccess', 'Message edited', content);
+                        socket.emit('showSuccess', 'Message edited', '');
                         io.in(row.thread).emit('editMessage', id, row.thread, content);
                     }
                 } else {
