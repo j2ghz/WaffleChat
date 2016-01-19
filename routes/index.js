@@ -3,19 +3,17 @@ var router = express.Router();
 var signup = require('../passport/signup');
 
 var isAuthenticated = function (req, res, next) {
-	// if user is authenticated in the session, call the next() to call the next request handler 
-	// Passport adds this method to request object. A middleware is allowed to add properties to
-	// request and response objects
+	//pokud je uživatel autentikovaný, pošle se požadavek dál
 	if (req.isAuthenticated()) {
 		return next();
     }
-	// if the user is not authenticated then redirect him to the login page
+	//jinak se přesměruje na přihlášení
 	res.redirect('/login');
 }
 
 module.exports = function(passport) { 
     router.post('/signupform', function(req, res, next) {
-        var username = req.body.username; //get post parameters
+        var username = req.body.username; //post parametry
         var password = req.body.password;
   	    signup(username, password, next);
     });
@@ -26,7 +24,7 @@ module.exports = function(passport) {
                 return next(err); 
             }
             if (!user) {
-                var error = new Error('Invalid username or password');
+                var error = new Error('Špatné jméno nebo heslo.');
                 error.status = 401;
                 return next(error);
             }

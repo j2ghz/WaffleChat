@@ -2,36 +2,40 @@
 /* global io */
 var socket = io(), myUsername, $chatContainer, $threads, $threadLi, $thread;
   
-//on document load
+//po načtení dokumentu se vytvoří proměnné ke cachování jQuery objektů (elementů na stránce, tedy oken, položek v menu atd. pro rychlejší načítání v průběhu)
 $(document).ready(function() { 
     $chatContainer = $('#chatContainer');
     $threads = $('#threads');
     $threadLi = [];
     $thread = [];
        
-    $('#createThread').click(function() {
+    //kliknutí na tlačítko vytvořit thread   
+    $('#createThread').click(function() { 
         swal({
-            title:'Enter a name',
-            text:'You may enter a maximum of 255 characters. Any characters.',
+            title:'Napiš jméno threadu',
+            text:'Můžeš napsat maximálně 255 znaků.',
             type:'input',
             showCancelButton:true,
             closeOnConfirm:false,
+            cancelButtonText:'Storno',
+            confirmButtonText:'Vytvořit',
             allowOutsideClick:true,
             showLoaderOnConfirm:true
         }, function(inputValue) {
             if (inputValue === false) return false;
             if (inputValue === '') {
-                swal.showInputError("You need to write something!");
+                swal.showInputError("Musíš něco napsat!");
                 return false;
             }
             if (inputValue.length > 255) {
-                swal.showInputError("Maximum length is 255 characters.");
+                swal.showInputError("Maximální délka je 255 znaků.");
                 return false;
             }
             socket.emit('createThread', inputValue); 
         });	
     });  
     
+    //kliknutí na tlačítko schovat všechny thready
     $('#collapseAllThreads').click(function() {
         $thread.forEach(function(obj) {
             if (obj) {
@@ -42,6 +46,7 @@ $(document).ready(function() {
         });
     });
     
+    //kliknutí na tlačítko ukázat všechny thready
     $('#uncollapseAllThreads').click(function() {
         $thread.forEach(function(obj) {
             if (obj) {
@@ -52,6 +57,7 @@ $(document).ready(function() {
         });
     });
     
+    //zavřít všechny thready
     $('#closeAllThreads').click(function() {
         $thread.forEach(function(obj) {
             if (obj) { 
@@ -61,11 +67,12 @@ $(document).ready(function() {
     });
 });
 
+//po připojení k serveru se uživateli odešle jeho jméno podle passport sessionu
 socket.on('setUsername', function(name) {
     myUsername = name;
 });
 
-//print list of threads and allow user to join them
+//poté se uživateli odešle seznam všech threadů, což je pole objektů
 socket.on('printThreads', function(threads) {
 	$threads.text('');
 	threads.forEach(function(thread) {
@@ -75,13 +82,14 @@ socket.on('printThreads', function(threads) {
 	});    
 });
 
+//po vytvoření threadu některým uživatelem se přidá do seznamu další
 socket.on('printThread', function(id, name, creator) {
     $threads.prepend(
         ThreadListItem(id, name, creator, null, null)
     );
 });
 
-//after joining and creation of element, print all messages
+//po připojení do threadu se uživateli zobrazí všechny zprávy
 socket.on('joinThread', function(messages, id, name) {    
     var threadWindow = ThreadWindow(id, name);    
     $chatContainer.append(threadWindow);      
@@ -89,57 +97,58 @@ socket.on('joinThread', function(messages, id, name) {
 	messages.forEach(function(message) {
         $thread[id].cached.messages.append(Message(message.id, message.thread, message.date, message.sender, message.content));	
 	});   
-    $thread[id]._scrollToLastMessage(false);
-    $thread[id].cached.textarea.focus();
+    $thread[id]._scrollToLastMessage(false); //scroll dolů bez animace
+    $thread[id].cached.textarea.focus(); //automatický focus na textové pole
 });
 
-//on receiving a message
+//po obdržení zprávy
 socket.on('message', function(id, thread, date, sender, content) {   
-    var wasAtBottom = $thread[thread].cached.messages._isAtBottom(), //needs to be determined before appending the new message
-        temp = $thread[thread].temp;
+    var wasAtBottom = $thread[thread].cached.messages._isAtBottom(), //před obdržením zprávy se zjizdí, zda byl uživatel úplně dole
+        temp = $thread[thread].temp; //dočasná zpráva
     
-    if (myUsername !== sender) { //if someone else sends it, notify
+    if (myUsername !== sender) { //pokud zprávu odeslal někdo jiný, ukáže se notifikace
         $thread[thread]._notifyOfNewMessage();   
     }  
     
-    if (temp[sender]) { //if a temporary message exists, remove it
+    if (temp[sender]) { //pokud existuje dočasná zpráva od příslušného uživatele
         temp[sender].remove();
         temp[sender] = undefined;   
     }
 
-	$thread[thread].cached.messages.append(
+	$thread[thread].cached.messages.append( //připojí se zpráva na konec threadu
         Message(id, thread, date, sender, content)
     );   
-    if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
+    if (wasAtBottom === true) { //pokud jsme byli úplně dole, tak se opět scrollne dolů
         $thread[thread]._scrollToLastMessage(true);
     }   
 });
 
+//při obdržení dočasné zprávy (tedy každé úpravě textového pole některého z uživatelů)
 socket.on('tempMessage', function(thread, sender, content) {
     var temp = $thread[thread].temp;
 
-    if ((content === '') || !content) { // if content is empty
-        if (temp[sender]) { //remove if exists
+    if ((content === '') || !content) { //pokud je textové pole odesílatele prázdné
+        if (temp[sender]) { //tak se dočasná zpráva smaže pokud existuje
             temp[sender].remove();
             temp[sender] = undefined;    
         }       
-    } else {       //if received content
+    } else {  //pokud jsme obdrželi nějaký obsah
         var wasAtBottom = $thread[thread].cached.messages._isAtBottom(),
-            message = Message(null, thread, null, sender, content); //create new message
+            message = Message(null, thread, null, sender, content); //vytvoří se nová zpráva bez ID a data
         
-        if (!temp[sender]) {   //if no temp message in thread from this sender exists        
-            temp[sender] = message.appendTo($thread[thread].cached.messages); //append a new one
+        if (!temp[sender]) { //pokud žádná dočasná zpráva ještě neexistuje      
+            temp[sender] = message.appendTo($thread[thread].cached.messages); //připojí se na konec
         } else {
-            temp[sender].html(message.html()); //otherwise replace html
+            temp[sender].html(message.html()); //jinak nahradí původní zprávu
         }
         
-        if (wasAtBottom === true) { //if you were scrolled to the bottom, scroll back to the bottom again
+        if (wasAtBottom === true) { //scroll dolů pokud jsme byli dole
             $thread[thread]._scrollToLastMessage(true);
         }  
     }
 });
 
-//when not joined in a thread, increment 'new messages since load' and change Last message date and sender
+//při obdržení zprávy se navíc úplně všem upraví seznam threadů
 socket.on('notifyInThreadList', function(thread, date, sender) { 
     date = new Date(date); 
     var $lastActivity = $threadLi[thread].cached.lastActivity,
@@ -148,11 +157,12 @@ socket.on('notifyInThreadList', function(thread, date, sender) {
     if ($lastActivity.eq(0).text() === '') {
         $threadLi[thread].cached.deleteThread.remove();
     }
-    $lastActivity.eq(0).text(showDate(date) + ' ' + showTime(date));
-    $lastActivity.eq(1).html(sender);
-    $numberOfMessages.text(Number($numberOfMessages.text()) + 1);
+    $lastActivity.eq(0).text(showDate(date) + ' ' + showTime(date)); //zobrazí se nové datum poslední zprávy
+    $lastActivity.eq(1).html(sender); //odesílatel
+    $numberOfMessages.text(Number($numberOfMessages.text()) + 1); //inkrementace počtu nových zpráv
 });
 
+//při úpravě threadu se změní jméno jak v seznamu, tak pokud jsme do threadu připojení
 socket.on('editThread', function(id, name) {
     $('.threadName', $threadLi[id]).html(name);
     if ($thread[id]) {
@@ -160,6 +170,7 @@ socket.on('editThread', function(id, name) {
     }
 });
 
+//při smazání threadu
 socket.on('deleteThread', function(id) {
     $threadLi[id].remove();
     if ($thread[id]) {
@@ -167,16 +178,18 @@ socket.on('deleteThread', function(id) {
     }
 });
 
+//při smazání zprávy
 socket.on('deleteMessage', function(id, thread) {
     var message = $thread[thread].message[id].cached;
     if (message) {
-        message.content.addClass('deleted');
-        message.content.text('deleted');
+        message.content.addClass('deleted'); //textu se přidá classa deleted (šedá kurzíva)
+        message.content.text('smazáno'); //obsah zprávy se nastaví na smazáno
         message.deleteMessage.remove();  
         message.editMessage.remove(); 
     }
 });
 
+//při úpravě zprávy
 socket.on('editMessage', function(id, thread, content) {
     var wasAtBottom = $thread[thread].cached.messages._isAtBottom(), message = $thread[thread].message[id].cached;
     if (message) {
@@ -188,6 +201,7 @@ socket.on('editMessage', function(id, thread, content) {
     }  
 });
 
+//při zobrazení chybné hlášky se ukáže sweetalert
 socket.on('showError', function(header, message) {
     setTimeout(function() {
         swal({
@@ -199,6 +213,7 @@ socket.on('showError', function(header, message) {
     }, 250);
 });
 
+//při zobrazení úspěšné akce
 socket.on('showSuccess', function(header, message) {
     setTimeout(function() {
         swal({
@@ -210,62 +225,62 @@ socket.on('showSuccess', function(header, message) {
     }, 250);
 });
 
-//creates thread list item element after connection or upon creation of new thread
+//vytvoří nový element do seznamu threadů
 function ThreadListItem(id, name, creator, lastActivity, lastSender) {
     lastActivity = new Date(lastActivity);
-    var li = $('<li/>').attr('data-id', id),
-        html = '';
+    var li = $('<li/>').attr('data-id', id), //vytvoří se nový, prázdný jquery objekt - element li
+        html = ''; //prázný obsah, který budeme naplňovat
     html += '<div class="threadName">' + name + '</div><div class="threadFlex">';
-    html += '<span class="threadCreator">Created by: <span class="value">' + creator + '</span></span>';
-    html += '<span class="threadLastActivity">Last message: <span class="value">';
-    if (lastSender === null) {
+    html += '<span class="threadCreator">Vytvořil: <span class="value">' + creator + '</span></span>';
+    html += '<span class="threadLastActivity">Poslední zpráva: <span class="value">';
+    if (lastSender === null) { //pokud není zatím žádná zpráva v threadu
         html += '</span> - <span class="value">';   
     } else {
         html += showDate(lastActivity) + ' ' + showTime(lastActivity) + '</span> - <span class="value">' + lastSender; 
     }
     html += '</span></span>';
-    html += '<span class="threadNewMessages">New messages since load: <span class="value">0</span></span></div>';
+    html += '<span class="threadNewMessages">Nové zprávy od načtení: <span class="value">0</span></span></div>';
     if (creator === myUsername) {
         html += '<i class="fa fa-pencil editThread"></i>';
         if (lastSender === null) {
             html += '<i class="fa fa-trash deleteThread"></i>'; 
         }
     }
-    li.html(html);
-    $threadLi[id] = li;
-    li._cacheThreadLi();
-    li._makeJoinable();
+    li.html(html); //obsah html, který jsme právě vygenerovali, se vloží do li
+    $threadLi[id] = li; //cache tohoto elementu
+    li._cacheThreadLi(); 
+    li._makeJoinable(); //možnost připojení se do threadu
     if (creator === myUsername) {
-        li._makeThreadEditable();
+        li._makeThreadEditable(); //možnost úpravy a smazání threadu
         li._makeThreadDeletable();
     }
     return li;
 }
 
-//creates thread window element after joining thread
-function ThreadWindow(id, name) { //creating new element for joining
-    var div = $('<div/>', { //create empty div
+//vytvoří nové okno threadu po připojení do threadu
+function ThreadWindow(id, name) {
+    var div = $('<div/>', { //vytvoří se prázdný div
             class: 'threadContainer',
         }).attr('data-id', id),
-        html = ''; //insert empty list of messages and form into it
+        html = '';
     html += '<h3 title="' + name + '"><i class="fa fa-comment-o notification"></i><span class="threadHeaderName">' + name + '</span><i class="fa fa-times close"></i></h3>';
     html += '<ul class="messages"></ul>';
     html += '<form class="messageForm" data-id="' + id + '">';
-    html += '<textarea autocomplete="off" placeholder="Enter your message here."></textarea>';
+    html += '<textarea autocomplete="off" placeholder="Sem napiš svou zprávu."></textarea>';
     html += '</form>';
-    div.html(html); //put content inside empty div     
+    div.html(html);  
     $thread[id] = div;
     $thread[id].temp = [];
     $thread[id].message = [];
     $thread[id].lastDate = null;
     div._cacheThread();  
-    div._makeCollapsible(); //collapsing behaviour
-    div._makeClosable();
-    div._makeSubmittable();
+    div._makeCollapsible(); //schovávání a zobrazování (minimalizace)
+    div._makeClosable(); //zavírání
+    div._makeSubmittable(); //aby šlo posílat zprávy
     return div;
 }
 
-//creates new message element upon socket joining thread
+//vytvoří nový element pro zprávu
 function Message(id, thread, date, sender, content) {
     date = new Date(date);
     var li = $('<li/>').attr('data-id', id),
@@ -277,14 +292,14 @@ function Message(id, thread, date, sender, content) {
         html += '<div class="messageDate">' + d + '</div>';   
     }
 
-    html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //if id of message is null, it is a temporary message not yet in db  
+    html += (id === null ? '<div class="messageFlex temp">' : '<div class="messageFlex">');  //pokud je id null, jedná se o dočasnou zprávu
     html += '<span class="messageContainer"><span class="messageSender">' + sender + '</span>';
-    html += (content === null ? '<span class="deleted messageContent">deleted' : '<span class="messageContent">' + content); //if content is null, it is a deleted message
+    html += (content === null ? '<span class="deleted messageContent">smazáno' : '<span class="messageContent">' + content); //pokud je obsah null, jedná se o smazanou zprávu
     html += '</span></span><span class="messageTime">';
-    if (id === null) { //if id is null, message is temp and it is still being typed
-        html += 'typing...';
+    if (id === null) { //pokud je id null, jedná se o dočasnou zprávu
+        html += 'píše...';
     } else {
-        if ((sender === myUsername) && content)  { //show delete icon only on users messages which are not yet deleted
+        if ((sender === myUsername) && content)  { //ukázat ikony mazání a úpravy jen uživateli, který zprávu odeslal a pokud není smazána
             html += '<i class="fa fa-trash-o deleteMessage"></i>';
             html += '<i class="fa fa-pencil editMessage"></i>';
         }
@@ -292,15 +307,15 @@ function Message(id, thread, date, sender, content) {
     }
     html += '</span></div>';
     li.html(html);
-    $thread[thread].message[id] = li;
+    $thread[thread].message[id] = li; //cache
     li._cacheMessage();
-    li._makeMessageDeletable();
+    li._makeMessageDeletable(); //aby šla zpráva mazat a upravovat
     li._makeMessageEditable();
-    li.linkify();
+    li.linkify(); //knihovna linkifyjs vytvoří odkazy ze všech url
     return li;        
 }
 
-//parses date object into string
+//vytvoří text v českém formátu z data
 function showDate(date) {
     return date.getDate() + '.' + (date.getMonth() + 1) + '.' + date.getFullYear() + ' ';
 }

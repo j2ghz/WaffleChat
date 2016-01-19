@@ -6,13 +6,13 @@ block content
         h1 WaffleThread
     div(class="genericContainer loginContainer")
         form(action='/loginform', method='POST')
-            input(type='text', name='username', placeholder='Username',required, autofocus)
-            input(type='password', name='password', placeholder='Password', required)
-            button(type='submit') Login
+            input(type='text', name='username', placeholder='Jméno',required, autofocus)
+            input(type='password', name='password', placeholder='Heslo', required)
+            button(type='submit') Přihlásit se
         form(action='/signupform', method='POST')
-            input(type='text', name='username', placeholder='Username',required)
-            input(type='password', name='password', placeholder='Password', required)
-            button(type='submit') Sign up           
+            input(type='text', name='username', placeholder='Jméno',required)
+            input(type='password', name='password', placeholder='Heslo', required)
+            button(type='submit') Registrovat se         
     script.
         if ('#{alertMessage}') {
             swal({
