@@ -24,7 +24,7 @@ app.use(sassMiddleware({
     prefix:  '/stylesheets'  // Where prefix is at <link rel="stylesheets" href="prefix/style.css"/>
 }));
 
-//parser, logger and pathing
+//parser, logger a pathing
 app.use(favicon(path.join(__dirname, 'public', 'favicon.gif')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -33,13 +33,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bower_components',  express.static(__dirname + '/bower_components'));
 
-//database
+//databáze
 var db = require('./database/conn');
 db.run("CREATE TABLE if not exists threads (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, creator TEXT, lastActivity TEXT, lastSender TEXT)");
 db.run("CREATE TABLE if not exists messages (id INTEGER PRIMARY KEY AUTOINCREMENT, thread TEXT, sender TEXT, content TEXT, date TEXT)");
 db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, salt TEXT)');
 
-//sessions
+//sessiony
 var expressSession = require('express-session');
 var FileStore = require('session-file-store')(expressSession);
 var sessionMiddleware = expressSession({
@@ -66,22 +66,22 @@ var io = require('socket.io')();
 io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
-app.io = io; //provide io object to /bin/www via module.export of app to attach to server
-require('./sockets')(io); //use logic from sockets.js file and provide io object from this file
+app.io = io; //poskytne io object /bin/www souboru pro připojení socket.io k serveru
+require('./sockets')(io); //logika socket.io se získá ze souboru sockets.js
 
 //routes
 var routes = require('./routes/index')(passport);
 app.use('/', routes);
 
-//error handlers
-// catch 404 and forward to error handler
+//error handlery
+//nejprve se odchytí 404
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-//redirect on bad login credentials
+//přesměrování při chybných údajích
 app.use(function(err, req, res, next) {
     if (err.status === 401 || err.status === 422) {
         res.status(err.status);
@@ -94,7 +94,7 @@ app.use(function(err, req, res, next) {
 });
 
 //development error handler
-//will print stacktrace
+//ukáže stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
@@ -106,7 +106,7 @@ if (app.get('env') === 'development') {
 }
 
 //production error handler
-//no stacktraces leaked to user
+//žádný stacktrace
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
