@@ -56,7 +56,7 @@ module.exports = function(io) {
         var name = null;
         id = validator.toInt(id);
         
-        if (socket.rooms.indexOf(id) === -1) {  
+        if (socket._threads.indexOf(id) === -1) {  
             db.get('SELECT name FROM threads WHERE id = ?', id, function(err, row) { //check if thread exists and if it does, find its name
                 if(!row){
                     socket.emit('showError', '', 'This thread no longer exists.');
@@ -208,10 +208,10 @@ module.exports = function(io) {
     
     //on disconnect of socket    
     socket.on('disconnect', function() {
-        var room = null;
+        var thread = null;
         while(socket._threads.length > 0) {
-            room = socket._threads.pop();
-            io.in(room).emit('tempMessage', room, socket._name, null);
+            thread = socket._threads.pop();
+            io.in(thread).emit('tempMessage', thread, socket._name, null);
         }
         console.log(socket._name + ' disconnected');
     });  
