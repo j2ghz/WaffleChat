@@ -3,7 +3,9 @@ var crypto = require('crypto');
 var hashPassword = require('./hash');
 var validator = require('validator');
 module.exports = function(username, password, next) {
-    if (validator.isAlphanumeric(username)) {
+    username = validator.trim(username);
+    if (validator.isLength(username, 2, 16)) {
+        username = validator.escape(username);
         db.get("SELECT username FROM users WHERE username = ?", username, function(err, row) {
             if (!row) {
                 var salt = crypto.randomBytes(16).toString("hex");
@@ -11,13 +13,13 @@ module.exports = function(username, password, next) {
                 next();  
             } else {
                 var error = new Error('Username already taken');
-                error.status = 403;
+                error.status = 422;
                 next(error);
             }
         });  
     } else {
-        var error = new Error('Username must contain only letters and numbers');
-        error.status = 403;
+        var error = new Error('Username must be between 2 and 16 characters long.');
+        error.status = 422;
         next(error);
     }
 }

@@ -2,14 +2,24 @@ extends layout
 
 block content
   body
-    div(class="genericContainer")
+    div(class="genericHeaderContainer")
         h1 WaffleThread
-        h2= message
+    div(class="genericContainer loginContainer")
         form(action='/loginform', method='POST')
             input(type='text', name='username', placeholder='Username',required, autofocus)
             input(type='password', name='password', placeholder='Password', required)
             button(type='submit') Login
         form(action='/signupform', method='POST')
-            input(type='text', name='username', placeholder='Username',required, autofocus)
+            input(type='text', name='username', placeholder='Username',required)
             input(type='password', name='password', placeholder='Password', required)
-            button(type='submit') Sign up
+            button(type='submit') Sign up           
+    script.
+        if ('#{alertMessage}') {
+            swal({
+                type:'error',
+                title: '',
+                text:'#{alertMessage}',
+                allowOutsideClick:true
+            });
+        }
+        

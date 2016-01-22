@@ -1,6 +1,6 @@
-$darker-orange:#d61;
-$dark-orange:#f82;
-$light-orange:#f93;
+$darker-orange:#d60;
+$dark-orange:#f80;
+$light-orange:#f90;
 
 body{
     background-image:url('../images/background.gif');
@@ -27,17 +27,59 @@ h2{
 }
 
 .genericContainer{
-    margin:2em auto;
+    margin:3em auto;
     display:block;
     max-width:992px;
     background-color:#fff;
+}
+
+.genericHeaderContainer{
+    margin:3em auto;
+    display:block;
+    max-width:992px;
+    background-color:$light-orange;
+    font-size:1.8em;
+    padding:0 2em;
+    
+    h1{
+        color:#fff;
+        margin:0em;
+    }
+}
+
+.loginContainer{
+    display:flex;
+    
+    form{
+        flex-grow:1;
+        flex-basis:0px;
+        text-align:center;
+        
+        &:first-child{
+            border-right:1px solid #ddd;
+        }
+        
+        input{
+            margin:5px;
+            width:80%;
+            height:1.5em;
+            padding:5px;
+        }
+        
+        button{
+            margin:10px;
+            width:50%;
+            height:2em;
+            font-size:1.5em;
+        }
+    }
 }
 
 //main container and list of threads
 #mainContainer{
     display:flex;
     justify-content:space-between;
-    max-height:100vh;
+    height:100vh;
 }
 
 #headerContainer{
@@ -45,8 +87,58 @@ h2{
     margin-right:25px;
     flex-shrink:0;
     background-color:$light-orange; 
-    h1, h2, a{
+    color:#fff;
+    padding:0px;
+    box-shadow:0px 10px 60px -20px #000;
+    
+    h1, h2{
         color:#fff;
+        margin:1em;
+    }
+    
+    h2{
+        margin-top:0px;
+        font-size:1.2em;
+    }
+    
+    a{
+        color:#fff;
+        display:inline-block;
+        width:100%;
+        text-decoration:none;
+    }
+    
+    #headerFunctions{
+        list-style-type:none;
+        padding-left:0px;
+        display:flex;
+        flex-direction:column;
+        
+        li{
+            cursor:pointer;
+            padding:15px;
+            margin:5px 0px;
+            background-color:$dark-orange;
+            transition: color 0.2s, background-color 0.2s;
+            
+            &:hover{
+                background-color:white;
+                color:$dark-orange;
+            }
+        }
+        
+        a{
+            width:auto;
+            margin:5px 0px;
+            flex-grow:1;
+            align-items:stretch;
+            display:flex;
+                
+            li{
+                margin:0px;
+                flex-grow:1
+            }
+        }
     }
 }
 
@@ -56,65 +148,82 @@ h2{
     background-color:#fff; 
 }
 
-#threadsContainer, #headerContainer, .genericContainer{
+#threadsContainer, .genericContainer, .genericHeaderContainer{
     overflow:auto;
-    box-shadow:0px 20px 70px -20px #000;
+    box-shadow:0px 15px 50px -20px #000;
     padding:2em;
+    border-radius:10px;
+    box-sizing:border-box;
 }
 
 #threads{
     list-style-type:none;
     padding-left:0;
-    width:100%;
-    
-    a{       
-        color:#666;
-        text-decoration:none;
+    width:100%;   
        
-        li{    
-            padding:1em;
-            margin-bottom:1em;
-            transition: color 0.2s, background-color 0.2s;
-            line-height:2em;
-            overflow:hidden;
-            text-overflow:ellipsis; 
-            position:relative;    
-            
-            .threadName {
-                transition: color 0.2s;
-                color:$dark-orange;
-                font-weight:bold;
-                font-size:1.2em;
-            }    
+    li{    
+        padding:1em;
+        margin-bottom:1em;
+        transition: color 0.2s, background-color 0.2s;
+        line-height:2em;
+        overflow:hidden;
+        text-overflow:ellipsis; 
+        position:relative; 
+        color:#666;
+        text-decoration:none; 
+        cursor:pointer;
         
-            .threadFlex {
-                display:flex;      
-                span{
-                    flex-basis:0px;
-                    flex-grow:1;
-                }        
-            }
-            
-            .threadLastActivity {
-                text-align:left;
-            }
-            
-            .threadNewMessages {
-                text-align:right;
-            }
+        .editThread, .deleteThread {
+            position:absolute;
+            top:0.5em;
         }
-  
+        
+        .editThread {
+            right:0.5em;
+            padding:0.25em;
+        }  
+        
+        .deleteThread {
+            right:2em;
+            padding:0.25em;
+        }
+        
+        .threadName {
+            transition: color 0.2s;
+            color:$dark-orange;
+            font-weight:bold;
+            font-size:1.2em;
+        }    
+    
+        .threadFlex {
+            display:flex;   
+               
+            span{
+                flex-basis:0px;
+            }      
+        }
+        
+        .threadCreator{
+            flex-grow:0.6;
+        }
+        
+        .threadLastActivity {
+            text-align:left;
+            flex-grow:1;
+        }
+        
+        .threadNewMessages {
+            flex-grow:0.6;
+            text-align:right;
+        }
+             
         &:hover{
             color:white; 
+            background-color:$light-orange;
             
             .threadName{
                 color:white;
-            }
-            
-            li{
-                background-color:$light-orange;
-            }
-            
+            }                  
         }
     }
 }
@@ -124,7 +233,8 @@ h2{
     left:1%;
     position:fixed;
     width:98%;
-    bottom:3px;
+    bottom:0px;
+    z-index:1;
     display:flex;
     flex-direction:row-reverse;
     text-align:left;
@@ -142,6 +252,9 @@ h2{
     pointer-events: none;
     height:auto;
     word-wrap:break-word;
+    box-shadow:0px 8px 8px -2px #000;
+    display:flex;
+    flex-direction:column;
     
     *{
         pointer-events:auto;
@@ -154,8 +267,6 @@ h2{
         padding:5px;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
-        position:relative;
-        font-size:1.2em;
         color:white;
         cursor:pointer;
         position:relative;
@@ -169,6 +280,7 @@ h2{
         font-size:1em;
         white-space:nowrap;
         font-weight:bold;
+        flex-shrink:0;
         
         .notification{
             position:absolute;
@@ -189,13 +301,6 @@ h2{
         }
     }
     
-    .messagesContainer{
-        overflow:hidden;
-        background-color:white;
-        box-shadow:0px 0px 10px -2px #000;
-        padding-bottom:5px;
-    }
-    
     ul.messages{
         list-style-type:none;
         margin:0px;
@@ -203,27 +308,53 @@ h2{
         overflow:auto;
         line-height:150%;
         position:relative;
+        flex-grow:1;
+        background-color:white;
     }
     
     .messageFlex{
         display:flex;
+        max-width:100%;
+        margin-bottom:5px;
+                      
+        &.temp{
+            opacity:0.4;
+        }  
+        
+        &:hover{
+            .deleteMessage, .editMessage{
+                opacity:1;  
+            }          
+        }
     }
     
     .messageSender {
         margin-right:5px;
         font-weight:bold;
         color:$darker-orange;
+        white-space:nowrap;
     }
     
-    .messageContent{
+    .messageContainer{
         flex-grow:1;
         word-wrap:break-word;
         min-width:0;
+        
+        .deleted{
+            opacity:0.7;
+            font-style:italic;
+        }
+    }
+    
+    .messageContent{
+        white-space:pre;
     }
     
     .messageTime{
         margin-left:5px;
         font-size:0.8em;
+        flex-shrink:0;
+        position:relative;
     }
     
     .messageDate{
@@ -232,25 +363,63 @@ h2{
         padding:5px;
     }
     
+    .deleteMessage, .editMessage{
+        font-size:1.5em;
+        opacity:0;
+        transition:opacity 0.2s;
+        cursor:pointer;
+        position:absolute;
+        background-color:white;
+        width:50%;
+        text-align:center;
+    }
+    
+    .deleteMessage{
+        left:0px;   
+    }
+    
+    .editMessage{
+        right:0px;
+    }
+    
     form.messageForm{
+        padding:1px 3px 0px 3px;
+        background-color:white;
                
-        input{
-            height:21px;
-            padding:1px 0;
-            border-width:2px;
+        textarea{
+            height:60px;
+            border-width:1px;
+            border-style:solid;
             width:100%;
-            position:relative;
-            right:1px;
+            box-sizing:border-box;
+            resize:none;
+            font-family: Verdana, sans-serif;  
+            padding:1px;          
         }
     }
     
     &.collapsed{
         flex-grow:0.5;
         max-width:250px;
+        flex-direction:column-reverse;
+        box-shadow:none;
+        background-color:none;
+        
+        form{
+            padding:0;
+        }
+        
+        .messages{
+            display:none;
+        }
+        
+        textarea{
+            display:none;
+        }
        
         h3{
             box-shadow:0px 2px 8px -2px #000;
-            height:2.5em;
+            height:2em;
             
             &.notifying{
                  background-color:$darker-orange;
@@ -261,13 +430,49 @@ h2{
 
 @media only screen and (max-width:1280px), only screen and (orientation:portrait){
     #mainContainer{
-        flex-direction:column;
         max-height:none;
+        height:auto;
     }
     
     #headerContainer{
+        position:fixed;
+        top:0px;
         height:auto;
         margin-right:0px;
+        width:100%;
+        z-index:1;
+        
+        h1, h2{
+            display:inline-block;
+        }
+        
+        #headerFunctions{
+            flex-direction:row;
+            margin:0px;
+            margin-bottom:5px;
+            
+            li{
+                margin:0px 5px 0px 0px;
+                flex-grow:1;
+                text-align:center;
+                
+                &:first-child{
+                    margin-left:5px;
+                }
+            }
+            
+            a{
+                margin:0px 5px 0px 0px;
+                
+                li, li:first-child{
+                    margin:0px;
+                }
+            }
+        }
+    }
+    
+    #threadsContainer{
+        margin-top:200px;
     }
     
     body{

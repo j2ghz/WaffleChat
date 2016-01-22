@@ -25,18 +25,18 @@ app.use(sassMiddleware({
 }));
 
 //parser, logger and pathing
-//uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.gif')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/bower_components',  express.static(__dirname + '/bower_components'));
 
 //database
 var db = require('./database/conn');
 db.run("CREATE TABLE if not exists threads (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, creator TEXT, lastActivity TEXT, lastSender TEXT)");
-db.run("CREATE TABLE if not exists messages (thread TEXT, sender TEXT, content TEXT, date TEXT)");
+db.run("CREATE TABLE if not exists messages (id INTEGER PRIMARY KEY AUTOINCREMENT, thread TEXT, sender TEXT, content TEXT, date TEXT)");
 db.run('CREATE TABLE if not exists users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, salt TEXT)');
 
 //sessions
@@ -64,7 +64,7 @@ initPassport(passport);
 //socket.io
 var io = require('socket.io')();
 io.use(function(socket, next) {
-    sessionMiddleware(socket.request, {}, next);
+    sessionMiddleware(socket.request, socket.request.res, next);
 });
 app.io = io; //provide io object to /bin/www via module.export of app to attach to server
 require('./sockets')(io); //use logic from sockets.js file and provide io object from this file
@@ -83,9 +83,10 @@ app.use(function(req, res, next) {
 
 //redirect on bad login credentials
 app.use(function(err, req, res, next) {
-    if (err.status === 401 || err.status === 403) {
+    if (err.status === 401 || err.status === 422) {
+        res.status(err.status);
         res.render('login', {
-            message: err.message
+            alertMessage: err.message
         });
     } else {
         next(err);
