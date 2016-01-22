@@ -4,15 +4,15 @@ block content
     div(id="mainContainer")
         div(id="headerContainer")
             h1 WaffleThread
-            h2 Logged in as !{username}
+            h2 Přihlášen jako !{username}
             ul(id="headerFunctions")
-                li(id="createThread") Create a thread
-                li(id="closeAllThreads") Close all threads
-                li(id="collapseAllThreads") Collapse all threads
-                li(id="uncollapseAllThreads") Uncollapse all threads
+                li(id="createThread") Vytvořit thread
+                li(id="closeAllThreads") Zavřít všechny thready
+                li(id="collapseAllThreads") Schovat všechny thready
+                li(id="uncollapseAllThreads") Ukázat všechny thready
                 a(href='/logout')
-                    li Logout
+                    li Odhlásit
         div(id="threadsContainer")
-            h1 List of threads         
+            h1 Seznam threadů    
             ul(id="threads")
     div(id="chatContainer")
